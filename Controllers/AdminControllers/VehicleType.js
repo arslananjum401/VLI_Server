@@ -57,16 +57,7 @@ export const GetAllVehicleTypes = async (req, res) => {
 export const GetVehicleTypesImage = async (req, res) => {
     try {
         req.query.url = req.query.url.replaceAll('"', '')
-        fs.readdir('./public/VehicleType/', (err, fileNames) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-
-            console.log(fileNames);
-        })
-
-
+ 
         const FilePath = path.join(__dirname, `../../${req.query.url}`);
 
 
