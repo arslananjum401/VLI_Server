@@ -63,7 +63,7 @@ export const GetVehicleTypesImage = async (req, res) => {
                 return;
             }
 
-            // console.log(fileNames);
+            console.log(fileNames);
         })
 
 
