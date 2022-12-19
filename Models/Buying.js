@@ -89,7 +89,7 @@ export const BoughtCourseModel = async (sequelize, Datatypes, BoughtModel, Cours
             allowNull: false, 
             references: {
                 model: CoursePackagesModel,
-                key: "IC_PackagesId"
+                key: "CoursePackageId"
             }
         },
 

@@ -101,40 +101,37 @@ export const VehicleTypesModel = async (sequelize, DataTypes) => {
 
 export const CourseModel = async (sequelize, DataTypes, ProductModel, VehicleTypeModel, LicenseTypesModel, SubLicenseTypesModel) => {
     return await sequelize.define('Course', {
-        CourseProductId: {
-            type: DataTypes.UUID,
-            // allowNull: false,
-            references: {
-                model: ProductModel,
-                key: 'ProductId'
-            }
-        },
+
         CoursePK: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
+        CourseName: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         Description: {
             type: DataTypes.STRING(2134),
             allowNull: false
         },
-        CourseVehicleType: {
+        VehicleTypeFK: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: false, 
             references: {
                 model: VehicleTypeModel,
                 key: 'VehicleTypeId'
             },
         },
-        CourseLicenseType: {
+        LicenseTypeFK: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: false, 
             references: {
-                model: LicenseTypesModel,
+                model: LicenseTypesModel, 
                 key: 'LicenseTypeId'
             },
         },
-        CourseSubLicenseType: {
+        SubLicenseTypeFK: {
             type: DataTypes.UUID,
             references: {
                 model: SubLicenseTypesModel,

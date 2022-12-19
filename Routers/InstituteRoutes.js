@@ -15,14 +15,13 @@ import { DataParser } from "../Middlewares/ParseData.js";
 
 
 const AuthenticateInstituteAdminUser = (req, res, next) => {
-    console.log(req.User.User)
-    AuthenticateUserType(req, res, next, "Institute", "Admin");
+    AuthenticateUserType(req, res, next, "Institute", ["Admin"]);
 }
 const AuthenticateInstituteStaffUser = (req, res, next) => {
-    AuthenticateUserType(req, res, next, "Institute", "Staff");
+    AuthenticateUserType(req, res, next, "Institute", ["Admin", "Staff"]);
 }
 const AuthenticateInstituteInstructorUser = (req, res, next) => {
-    AuthenticateUserType(req, res, next, "Institute", "Instructor");
+    AuthenticateUserType(req, res, next, "Institute", ["Admin", "Instructor", "Staff"]);
 }
 const MulterForCourseCurriculum = (req, res, next) => {
     let MulterVals = {};
@@ -77,16 +76,17 @@ Irouter
 
 
 
-Irouter
-    .get('/staff/course/forward', AuthenticatedUser, AuthenticateInstituteStaffUser, GetForwardedCourses)
+Irouter.get('/staff/course/forward', AuthenticatedUser, AuthenticateInstituteStaffUser, GetForwardedCourses)
 
 
 // Edit Course for Inventory
 Irouter
-    .post("/course/institute/add", AuthenticatedUser, AuthenticateInstituteAdminUser, MulterForCourseCurriculum, DataParser, AddCourseToInstitute)
-    .put("/course/institute/update", AuthenticatedUser, AuthenticateInstituteStaffUser, MulterForCourseCurriculum, DataParser, UpdateInstituteCourse)
-    .get("/course/institute/get", AuthenticatedUser, AuthenticateInstituteStaffUser, GetInstituteCourses)
-    .delete("/course/institute/remove", AuthenticatedUser, AuthenticateInstituteStaffUser, RemoveCourseFromInstitute)
+    .post("/institute/course/add", AuthenticatedUser, AuthenticateInstituteAdminUser, MulterForCourseCurriculum, DataParser, AddCourseToInstitute)
+    .put("/institute/course/update", AuthenticatedUser, AuthenticateInstituteStaffUser, MulterForCourseCurriculum, DataParser, UpdateInstituteCourse)
+    .get("/institute/courses", AuthenticatedUser, GetInstituteCourses)
+    .get("/institute/courses/:InstituteId", GetInstituteCourses)
+    .get("/institute/course/:InstituteCourseId", GetInstituteCourse)
+    .delete("/institute/course/remove", AuthenticatedUser, AuthenticateInstituteStaffUser, RemoveCourseFromInstitute)
 
 //  Staff APIs
 Irouter

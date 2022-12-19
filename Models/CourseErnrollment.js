@@ -9,8 +9,8 @@ export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageM
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: CoursePackageModel,
-                key: 'IC_PackagesId'
+                model: CoursePackageModel, 
+                key: 'CoursePackageId'
             }
         },
 

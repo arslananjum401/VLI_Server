@@ -2,14 +2,6 @@
 
 export const Institute = async (sequelize, DataTypes, referencesModel) => {
     const institute = await sequelize.define('Institute', {
-        // InstituteUserId: {
-        //     type: DataTypes.UUID,
-        //     allowNull: false,
-        //     references: {
-        //         model: referencesModel,
-        //         key: 'UserId'
-        //     }
-        // },
         InstituteId: {
             type: DataTypes.UUID,
             allowNull: false,
@@ -62,7 +54,6 @@ export const Institute = async (sequelize, DataTypes, referencesModel) => {
         InstituteLogo: {
             type: DataTypes.STRING,
             allowNull: false
-
         },
         LR_Slip: {
             type: DataTypes.STRING,
@@ -73,7 +64,9 @@ export const Institute = async (sequelize, DataTypes, referencesModel) => {
             allowNull: false
 
         },
-
+        WebsiteUrl: {
+            type: DataTypes.STRING,
+        }
     },
         {
             timestamps: true,
@@ -188,15 +181,15 @@ export const InstructorModel = async (sequelize, DataTypes, InstituteMId, Licens
     return Instructor;
 }
 
-export const CourseToInstituteModel = async (sequelize, DataTypes, InstituteModel, ProductModel, VehicleModel, InstructorModel) => {
-    return await sequelize.define('CProductToInstitute', {
-        cProductInstituteId: {
+export const InstituteCourseModel = async (sequelize, DataTypes, InstituteModel, VehicleModel, CourseModel) => {
+    return await sequelize.define('InstituteCourse', {
+        InstituteCourseId: {
             type: DataTypes.UUID,
             allowNull: false,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
-        cPI_InstituteId: {
+        InstituteFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
@@ -204,22 +197,15 @@ export const CourseToInstituteModel = async (sequelize, DataTypes, InstituteMode
                 key: 'InstituteId'
             }
         },
-        cPI_ProductId: {
+        CourseFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: ProductModel,
-                key: 'ProductId'
+                model: CourseModel,
+                key: 'CoursePK'
             }
         },
-        // InstructorFK: {
-        //     type: DataTypes.UUID,
-        //     allowNull: false,
-        //     references: {
-        //         model: InstructorModel,
-        //         key: 'InstructorId'
-        //     }
-        // },
+
         VehicleFK: {
             type: DataTypes.UUID,
             allowNull: false,
@@ -264,19 +250,19 @@ export const CourseToInstituteModel = async (sequelize, DataTypes, InstituteMode
     )
 }
 
-export const CourseInstructorsModel = async (sequelize, DataTypes, CProductInstituteModel, InstructorModel) => {
-    return await sequelize.define("CourseInstructors", {
+export const CourseInstructorsModel = async (sequelize, DataTypes, InstituteCoursesModel, InstructorModel) => {
+    return await sequelize.define("CourseInstructor", {
         CourseInstructorId: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
-        CProductInstitutFK: {
+        InstituteCourseFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: CProductInstituteModel,
-                key: "cProductInstituteId"
+                model: InstituteCoursesModel,
+                key: "InstituteCourseId"
             }
         },
         InstructorFK: {
@@ -287,27 +273,27 @@ export const CourseInstructorsModel = async (sequelize, DataTypes, CProductInsti
                 key: "InstructorId"
             }
         },
-    },{
+    }, {
         timestamps: true,
         createdAt: true,
         updatedAt: false,
     }
-)
+    )
 }
 
-export const InstituteCoursePackagesModel = async (sequelize, DataTypes, CourseToInstituteModel) => {
-    return await sequelize.define('CoursePackages', {
-        IC_PackagesId: {
+export const CoursePackagesModel = async (sequelize, DataTypes, InstituteCoursesModel) => {
+    return await sequelize.define('CoursePackage', {
+        CoursePackageId: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
-        cPI_Id: {
+        InstituteCourseFK: {
             type: DataTypes.UUID,
             allowNull: false,
-            references: {
-                model: CourseToInstituteModel,
-                key: "cProductInstituteId"
+            references: { 
+                model: InstituteCoursesModel,
+                key: "InstituteCourseId"
             }
         },
         DrivingHours: {

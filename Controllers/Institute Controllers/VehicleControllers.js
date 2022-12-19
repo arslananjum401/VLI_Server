@@ -11,7 +11,7 @@ export const AddVehicle = async (req, res) => {
             req.body.images.push(req.body[key])
     }
     req.body.InstituteFK = req.User.Institute.InstituteId;
-    
+
     try {
 
         if (req.body?.images?.length <= 1 || !req.body.images) {
@@ -86,44 +86,42 @@ export const UpdateVehicle = async (req, res) => {
 
         const AddNewVehicle = await Vehicle.update(req.body, { where: { VehicleId: req.body.VehicleId } });
 
+
         //To update the Current Images
-        await Promise.all(await req.body.Images.UpdateImages.map(async (image, index, arr) => {
-            try {
+        if (req.body.UpdateImages) {
+            await Promise.all(await req.body.UpdateImages.map(async (image, index, arr) => {
+                try {
+                    console.log(image.Vehicle_ImageId)
+                    const FindOldImage = await VehicleImages.findOne({ where: { Vehicle_ImageId: image.Vehicle_ImageId } })// Get to get Old Image
 
-                const FindOldImage = await VehicleImages.findOne({ where: { Vehicle_ImageId: image.VehicleImageId } })// Get to get Old Image
-                DeleteFile(FindOldImage.VehicleImageLink)// To delete Old Image
+                    DeleteFile(VehicleImages, FindOldImage)// To delete Old Image
 
-                const AddVehicleImages = await VehicleImages.update({
-                    VehicleImageLink: image.path
-                },
-                    { where: { Vehicle_ImageId: image.VehicleImageId } }
-                );
-            } catch (error) {
-                console.log(error)
-            }
-        }))
+                    if (req.body[image.Pair] && FindOldImage) {
+                        const AddImage = await VehicleImages.create({ VehicleFK: FindOldImage.VehicleFK, VehicleImageLink: req.body[image.Pair] })
+                        // console.log(AddImage)
+                    }
+
+                } catch (error) {
+                    console.log(error)
+                }
+            }))
+        }
 
 
+        let Length = CheckVehicle.VehicleImages.length + req.body.NewImages.length
 
         //To add New Images
-        if (req.body.Images?.NewImages && req.body.Images?.NewImages?.length > 0) {
+        if (Length < 6 && req.body.NewImages?.length > 0) {
 
+            await req.body.NewImages.forEach(async (ImagePath) => {
 
-            for (const iterator of req.body.Images.NewImages) {
-                const CheckVehicleImages = await Vehicle.findOne({
-                    where: { VehicleId: req.body.VehicleId },
-                    include: [{
-                        model: VehicleImages,
-                        attributes: ["VehicleImageLink"],
-                    }]
-                })
-                if (CheckVehicleImages.VehicleImages.length >= 6) {
-                    return res.status(403).json({ message: "No more Images can be added" });
-                }
                 try {
+                    // if (CheckVehicleImages.VehicleImages.length >= 6) {
+                    //     return res.status(403).json({ message: "No more Images can be added" });
 
+                    // }
                     const AddVehicleImages = await VehicleImages.create({
-                        VehicleImageLink: iterator,
+                        VehicleImageLink: ImagePath,
                         VehicleFK: req.body.VehicleId
                     },
                     );
@@ -131,7 +129,9 @@ export const UpdateVehicle = async (req, res) => {
                 } catch (error) {
                     console.log(error)
                 }
-            }
+
+            })
+
         }
 
 
@@ -221,3 +221,5 @@ export const GetSingleVehicle = async (req, res) => {
         return res.status(500).json({ error });
     }
 }
+
+

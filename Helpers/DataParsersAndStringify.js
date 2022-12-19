@@ -4,7 +4,6 @@ export const StringifyFQAs = (req) => {
     }
 }
 export const ParseFAQs = (CourseData) => {
-    console.log(CourseData.Possible_FAQs)
     if (CourseData.Possible_FAQs) {
         CourseData.Possible_FAQs = JSON.parse(CourseData.Possible_FAQs)
     }

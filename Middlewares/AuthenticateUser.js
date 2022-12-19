@@ -46,11 +46,15 @@ export const AuthenticatedUser = async (req, res, next) => {
 }
 
 export const AuthenticateUserType = async (req, res, next, UserType, InstituteUserType) => {
-    if (req.User.User !== UserType) 
+    if (req.User.User !== UserType)
         return res.status(401).json({ message: "Unauthorized Access" });
-    
-    if (req.User.User === "Institute" && req.User.InstituteUserType !== InstituteUserType)
-        return res.status(401).json({ message: "Unauthorized Institute User" });
 
+    let check = false;
+    if (req.User.User === "Institute") {
+        InstituteUserType.forEach((InstituteUserType) => { if (req.User.InstituteUserType === InstituteUserType) check = true; })
+
+        if (!check) return res.status(401).json({ message: "Unauthorized Institute User" });
+    }
     next()
 }
+ 

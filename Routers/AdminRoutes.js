@@ -71,7 +71,7 @@ Aroutes
     .post('/course/create', AuthenticatedUser, AuthenticateAdminUser, MulterForCourseThumbnail, DataParser, NewCourse)//done
     .put('/course/update', AuthenticatedUser, AuthenticateAdminUser, MulterForCourseThumbnail, DataParser, UpdateCourse)//done
     .delete('/course', AuthenticatedUser, AuthenticateAdminUser, DeleteCourse)//done
-    .get('/course/:ProductId', GetCourse)
+    .get('/course/:CoursePK', GetCourse)
     .get('/courses',
         // AuthenticatedUser, AuthenticateAdminUser,
         GetAllCourses);

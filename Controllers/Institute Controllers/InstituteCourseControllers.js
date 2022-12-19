@@ -4,21 +4,18 @@ import { CheckUUID } from "../../Helpers/CheckUUID.js";
 import { ParseFAQs, StringifyFQAs } from "../../Helpers/DataParsersAndStringify.js";
 import { DeleteFile } from "../../Helpers/DeleteMedia.js";
 
-const { CProductToInstitute, Institute, Product, Course, InstituteCoursePackage, Instructor, Vehicle, User, CourseInstructors } = db;
+const { InstituteCourses, Institute, Product, Course, CoursePackages, Instructor, Vehicle, User, CourseInstructors } = db;
 const Query = [
     {
-        model: Instructor, required: true,
+        model: Instructor,
         where: { Suspend: false },
         attributes: ["InstructorId", "PhoneNumber", "LicenseNumber"],
         include: { model: User, attributes: ["FirstName", "LastName"] }
     },
-    { model: Vehicle, required: true, attributes: ["VehicleId", "ManufacturingCompany", "Model", "Year", "PlateNumber"] },
-    { model: InstituteCoursePackage, required: true, attributes: ["IC_PackagesId", "DrivingHours", "InClassHours", "OnlineHours", "TotalFee"] },
-    {
-        model: Product, required: true, attributes: ["ProductId", "ProductName"],
-        where: { ProductType: "Course" },
-        include: [{ model: Course , attributes: ["CoursePK", "Description", "RunningCourse", "Promotion"]}]
-    }
+    { model: Vehicle, attributes: ["VehicleId", "ManufacturingCompany", "Model", "Year", "PlateNumber"] },
+    { model: CoursePackages, attributes: ["CoursePackageId", "DrivingHours", "InClassHours", "OnlineHours", "TotalFee"] },
+    { model: Course, attributes: ["CoursePK", "Description", "RunningCourse", "Promotion"] },
+    { model: Institute, attributes: ["InstituteName"] }
 ];
 
 export const AddCourseToInstitute = async (req, res) => {
@@ -26,54 +23,55 @@ export const AddCourseToInstitute = async (req, res) => {
     if (!req.body.Packages) {
         return res.status(401).json({ message: "Curriculum is required" })
     }
-    let a = req.body.Instructors
+    let Instructors = req.body.Instructors
     try {
-        const CheckInstituteCourse = await CProductToInstitute.findOne({
+
+        const CheckInstituteCourse = await InstituteCourses.findOne({
             where: {
-                cPI_InstituteId: req.User.Institute.InstituteId,
-                cPI_ProductId: req.body.ProductId
+                InstituteFK: req.User.Institute.InstituteId,
+                CourseFK: req.body.CourseFK
             },
         })
 
         if (CheckInstituteCourse) {
             return res.status(401).json({ message: "Course already addedd" });
         }
-        if (!CheckUUID(req.body.ProductId)) {
+        if (!CheckUUID(req.body.CourseFK)) {
             return res.status(200).json({ message: "Invalid UUID" })
         }
 
-        delete req.body.Instructors;
-        const GetProduct = await Product.findOne({ where: { ProductId: req.body.ProductId } })
+        delete req.body.Instructors; 0
 
-        req.body.cPI_InstituteId = req.User.Institute.InstituteId;
-        req.body.cPI_ProductId = GetProduct.ProductId;
+        const GetCourse = await Course.findOne({ where: { CoursePK: req.body.CourseFK } })
+
+
+        req.body.InstituteFK = req.User.Institute.InstituteId;
+        req.body.CourseFK = GetCourse.CoursePK;
         StringifyFQAs(req)
-        const InstituteCourseCreated = await CProductToInstitute.create(req.body)
+        const InstituteCourseCreated = await InstituteCourses.create(req.body)
         await Promise.all(req.body.Packages.map(async (value) => {
             try {
-                value.cPI_Id = InstituteCourseCreated.cProductInstituteId;
-                await InstituteCoursePackage.create(value);
+                value.InstituteCourseFK = InstituteCourseCreated.InstituteCourseId;
+                await CoursePackages.create(value);
             } catch (error) {
                 console.log(error)
             }
         }))
-        a = a.map((value) => {
-            value = { InstructorFK: value, CProductInstitutFK: InstituteCourseCreated.cProductInstituteId }
+
+        Instructors = Instructors.map((value) => {
+            value = { InstructorFK: value, InstituteCourseFK: InstituteCourseCreated.InstituteCourseId }
             return value
         })
 
-        const AddInstructorsforCourse = await CourseInstructors.bulkCreate(a);
+        const AddInstructorsforCourse = await CourseInstructors.bulkCreate(Instructors);
 
 
-
-
-
-        const InstituteCourse = await CProductToInstitute.findOne({
-            where: { cProductInstituteId: InstituteCourseCreated.cProductInstituteId },
+        const InstituteCourse = await InstituteCourses.findOne({
+            where: { InstituteCourseId: InstituteCourseCreated.InstituteCourseId },
             include: Query
 
         })
-        console.log(InstituteCourse)
+
         ParseFAQs(InstituteCourse)
         res.status(200).json(InstituteCourse)
     } catch (error) {
@@ -85,18 +83,18 @@ export const AddCourseToInstitute = async (req, res) => {
 
 export const RemoveCourseFromInstitute = async (req, res) => {
     try {
-        const GetInstituteCourse = await CProductToInstitute.findOne({
+        const GetInstituteCourse = await InstituteCourses.findOne({
             where: { cProudctInstituteId: req.body.cProudctInstituteId },
         })
         if (!GetInstituteCourse) {
             return res.status(404).json({ message: "Course not for Institute or has been deleted" })
         }
-        const DeleteInstituteCourse = await CProductToInstitute.destroy({
+        const DeleteInstituteCourse = await InstituteCourses.destroy({
             where: { cProudctInstituteId: GetInstituteCourse.cProudctInstituteId }
         }
         );
         DeleteFile(`${GetInstituteCourse.CourseCurriculum}`)
-        await InstituteCoursePackage.destroy({ cPI_Id: GetInstituteCourse.cProudctInstituteId })
+        await CoursePackages.destroy({ cPI_Id: GetInstituteCourse.cProudctInstituteId })
 
         res.status(200).json({ message: "Course Deleted Successfully", Success: true })
     } catch (error) {
@@ -108,12 +106,13 @@ export const RemoveCourseFromInstitute = async (req, res) => {
 
 export const GetInstituteCourses = async (req, res) => {
     try {
-        const InstituteCourse = await CProductToInstitute.findAll({
-            where: { cPI_InstituteId: req.User.Institute.InstituteId },
-            attributes: { exclude: ["VehicleFK", "cPI_ProductId", "cPI_InstituteId", "InstructorFK", "createdAt"] },
+        const InstituteCourse = await InstituteCourses.findAll({
+            where: { InstituteFK: req.User.Institute.InstituteId },
+            attributes: { exclude: ["VehicleFK", "InstituteFK", "InstructorFK", "createdAt"] },
             include: Query
 
         })
+
         ParseFAQs(InstituteCourse)
         res.status(200).json(InstituteCourse)
     } catch (error) {
@@ -127,23 +126,22 @@ export const GetInstituteCourses = async (req, res) => {
 export const UpdateInstituteCourse = async (req, res) => {
     req.body.Publish = false
     try {
-        const GetInstituteCourse = await CProductToInstitute.findOne({
+        const GetInstituteCourse = await InstituteCourses.findOne({
             where: { cProudctInstituteId: req.body.cProudctInstituteId },
         })
 
-        if (!GetInstituteCourse) {
-            return res.status(404).json({ message: "Course not found or has been deleted" })
-        }
+        if (!GetInstituteCourse) return res.status(404).json({ message: "Course not found or has been deleted" })
+
 
         req.body.CourseCurriculum = req.body.UpdateCourseCurriculum
-        const UpdateCourse = await CProductToInstitute.update(req.body, {
+        const UpdateCourse = await InstituteCourses.update(req.body, {
             where: { cProudctInstituteId: req.body.cProudctInstituteId }
         })
 
         if (req.body.UpdateCourseCurriculum) {
             DeleteFile(`${GetInstituteCourse.CourseCurriculum}`)
         }
-        const GetUpdatedInstituteCourse = await CProductToInstitute.findOne({
+        const GetUpdatedInstituteCourse = await InstituteCourses.findOne({
             where: { cProudctInstituteId: req.body.cProudctInstituteId },
             include: Query
         })
@@ -161,35 +159,14 @@ export const UpdateInstituteCourse = async (req, res) => {
 export const GetInstituteCourse = async (req, res) => {
     try {
 
-        if (req.params.Publish === "Publish")
-            req.params.Publish = true;
-
-        if (req.params.Publish === "UnPublish")
-            req.params.Publish = false;
-
-        const GetCourse = await Product.findAll({
-            include: [
-                {
-                    model: Course,
-                    attributes: ["CoursePK", "Description", "CourseVehicleType", "CourseLicenseType", "CourseSubLicenseType", "CourseThumbnail"]
-                },
-                {
-                    model: CProductToInstitute,
-                    where: {
-                        cPI_InstituteId: req.User.Institute.InstituteId,
-                        Publish: req.params.Publish
-                    },
-                    attributes: ["ShortDescription", "LongDescription", "CourseCurriculum", "Possible_FAQs", "InstructorFK"],
-                    required: true,
-                    include: {
-                        model: InstituteCoursePackage,
-                        where: { Status: "Viewable" },
-                        attributes: { exclude: ["cPI_Id", "Status", "createdAt"] }
-                    }
-                },
-            ]
+        const InstituteCourse = await InstituteCourses.findOne({
+            where: { InstituteCourseId: req.params.InstituteCourseId },
+            attributes: { exclude: ["VehicleFK",  "InstituteFK", "InstructorFK", "createdAt"] },
+            include: Query
         })
-        res.status(200).json(GetCourse)
+
+
+        res.status(200).json(InstituteCourse)
     } catch (error) {
         console.log(`error occurred while Getting UnPublished course of Institute: ${error.message}`);
         return res.status(500).json({ error });

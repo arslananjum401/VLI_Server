@@ -30,6 +30,11 @@ export const UserModel = async (sequelize, Datatypes) => {
             type: Datatypes.STRING,
             // allowNull: false
         },
+
+        PhoneNumber: {
+            type: Datatypes.STRING,
+            // allowNull: false
+        },
         User: {
             type: Datatypes.STRING,
             allowNull: false

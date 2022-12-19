@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import db from '../../Conn/connection.js';
-import crypto from 'crypto';
+import crypto, { randomUUID } from 'crypto';
 import { getVerifyEmailToken, sendEmail } from '../../Middlewares/ResetPassword.js';
 import { ComparePassword } from '../../Middlewares/PasswordVerification.js';
 
@@ -70,7 +70,7 @@ export const Login = async (req, res) => {
         }
         if (!CheckPassword) {
 
-            return res.status(401).json({ message: "Email or password incorrect" });
+            return res.status(401).json({ LoginError: "Email or password incorrect" });
         }
 
         return await SendResponse(req, res, LoginUser, StudentInterest, 200);
@@ -83,27 +83,29 @@ export const Login = async (req, res) => {
 
 
 export const SignUp = async (req, res) => {
-    if (!req.body.UserName) 
-        req.body.UserName = req.body.FirstName + req.body.LastName
-    
-    if (!req.body.User) 
-        req.body.User = "Student"
-    
+    let Id = randomUUID().split('-')
+    if (!req.body.UserName) {
+        req.body.UserName = req.body.FirstName + req.body.LastName + Id[Id.length - 1]
+
+    }
+
+    if (!req.body.User) req.body.User = "Student"
+
     try {
         let ErrorCheck = {};
-        ErrorCheck.EmailErr = await UserModel.findOne({
+
+        ErrorCheck.Email= await UserModel.findOne({
             where: {
-                Email: req.body.Email 
+                Email: req.body.Email
             }
         });
-        ErrorCheck.UserNameErr = await UserModel.findOne({
+        ErrorCheck.UserName = await UserModel.findOne({
             where: {
                 UserName: req.body.UserName
             }
         });
-        if (SignupErrorHelper(ErrorCheck, res)) {
-            return
-        }
+        if (SignupErrorHelper(ErrorCheck, res, req.body)) return
+
 
         const CreatedUser = await UserModel.create(req.body);
 

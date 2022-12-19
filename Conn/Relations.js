@@ -1,18 +1,13 @@
 import db from './connection.js';
-const { Institute, Course, User, Instructor, Cart, Book, WishList, Product, LicenseTypes, Countries, VehicleTypes, CourseEnrollment, SubLicenseTypes, InstituteCoursePackage: CoursePackage, CProductToInstitute, Vehicle, VehicleImages, InstituteUser, UserEmailValidation, UserResetPassword, ForwardedCourse, BookReputationInfo, Bought, BoughtCourse, BoughtBook, CourseInstructors } = db;
+const { Institute, Course, User, Instructor, Cart, Book, WishList, Product, LicenseTypes, Countries, VehicleTypes, CourseEnrollment, SubLicenseTypes, CoursePackages, InstituteCourses, Vehicle, VehicleImages, InstituteUser, UserEmailValidation, UserResetPassword, ForwardedCourse, BookReputationInfo, Bought, BoughtCourse, BoughtBook, CourseInstructors } = db;
 export const Realtions = () => {
     //Institute and User Relation
     Institute.hasOne(InstituteUser, { foreignKey: "InstituteFK" });
     InstituteUser.belongsTo(Institute, { foreignKey: "InstituteFK" });
-    User.hasOne(InstituteUser, { foreignKey: "Institute_UserFK" })
-    InstituteUser.belongsTo(User, { foreignKey: "Institute_UserFK" })
-
-
-
-
+    User.hasOne(InstituteUser, { foreignKey: "Institute_UserFK" });
+    InstituteUser.belongsTo(User, { foreignKey: "Institute_UserFK" });
 
     //EmailValidation and User Relation 
-
     UserEmailValidation.belongsTo(User, { foreignKey: "UserFK" })
     User.hasOne(UserEmailValidation, { foreignKey: "UserFK" })
 
@@ -32,23 +27,17 @@ export const Realtions = () => {
     User.hasOne(Instructor, { foreignKey: "UserFK" })
     Instructor.belongsTo(User, { foreignKey: "UserFK" })
 
-
-    Instructor.belongsToMany(CProductToInstitute, { through: CourseInstructors, foreignKey: "InstructorFK" })
-    CProductToInstitute.belongsToMany(Instructor, { through: CourseInstructors, foreignKey: "CProductInstitutFK" })
-
-    // Course and Product Relation
-    Course.belongsTo(Product, { foreignKey: 'CourseProductId' });
-    Product.hasOne(Course, { foreignKey: 'CourseProductId' });
-    // Product.belongsTo(LicenseTypes, { foreignKey: 'ProductLicenseTypeId' });
+    Instructor.belongsToMany(InstituteCourses, { through: CourseInstructors, foreignKey: "InstructorFK" })
+    InstituteCourses.belongsToMany(Instructor, { through: CourseInstructors, foreignKey: "InstituteCourseFK" })
 
     // Course and License Type Relation
-    Course.belongsTo(LicenseTypes, { foreignKey: 'CourseLicenseType' });
+    Course.belongsTo(LicenseTypes, { foreignKey: 'LicenseTypeFK' });
 
     // Course and Sub-License Type Relation
-    Course.belongsTo(SubLicenseTypes, { foreignKey: 'CourseSubLicenseType' });
+    Course.belongsTo(SubLicenseTypes, { foreignKey: 'SubLicenseTypeFK' });
 
     // Course and Vehicle Types Relation
-    Course.belongsTo(VehicleTypes, { foreignKey: 'CourseVehicleType' });
+    Course.belongsTo(VehicleTypes, { foreignKey: 'VehicleTypeFK' });
 
 
     // Countries and LicenseType Relation   (many-to-many)
@@ -57,7 +46,7 @@ export const Realtions = () => {
 
 
 
-    // Institute and Vehicle Relation   (one-to-many)
+    // Institute and Vehicle Relation   (one-to-many) 
     Institute.hasMany(Vehicle, { foreignKey: "InstituteFK" })
 
 
@@ -66,8 +55,8 @@ export const Realtions = () => {
 
     BoughtCourse.belongsTo(Bought, { foreignKey: "BoughtFK" });
     Bought.hasOne(BoughtCourse, { foreignKey: "BoughtFK" });
-    BoughtCourse.belongsTo(CoursePackage, { foreignKey: "CoursePackageFK" });
-    CoursePackage.hasMany(BoughtCourse, { foreignKey: "CoursePackageFK" });
+    BoughtCourse.belongsTo(CoursePackages, { foreignKey: "CoursePackagesFK" });
+    CoursePackages.hasMany(BoughtCourse, { foreignKey: "CoursePackagesFK" });
 
 
     BoughtBook.belongsTo(Bought, { foreignKey: "BoughtFK" });
@@ -77,30 +66,24 @@ export const Realtions = () => {
 
     // Institute and Product (Course) Relation when adding Institute will add course to Inventory
 
-    // 1.Institute and CProductToInstitute Relation (one-to-many)
-    Institute.hasMany(CProductToInstitute, { foreignKey: "cPI_InstituteId" })
-    CProductToInstitute.belongsTo(Institute, { foreignKey: "cPI_InstituteId" })
+    // 1.Institute and InstituteCourses Relation (one-to-many)
+    Institute.hasMany(InstituteCourses, { foreignKey: "InstituteFK" })
+    InstituteCourses.belongsTo(Institute, { foreignKey: "InstituteFK" })
 
-    // 2.Product and CProductToInstitute Relation (one-to-many)
-    Product.hasMany(CProductToInstitute, { foreignKey: "cPI_ProductId" });
-    CProductToInstitute.belongsTo(Product, { foreignKey: "cPI_ProductId" })
+    // 2.Product and InstituteCourses Relation (one-to-many)
+    Course.hasMany(InstituteCourses, { foreignKey: "CourseFK" });
+    InstituteCourses.belongsTo(Product, { foreignKey: "CourseFK" })
 
-    // Product.belongsToMany(Institute, { through: CProductToInstitute, foreignKey: "cPI_ProductId" });
-    // Institute.belongsToMany(Product, { through: CProductToInstitute, foreignKey: "cPI_InstituteId" });
-    // 3.Vehicle and CProductToInstitute Relation (one-to-many)
-    Vehicle.hasMany(CProductToInstitute, { foreignKey: "VehicleFK" })
-    CProductToInstitute.belongsTo(Vehicle, { foreignKey: "VehicleFK" })
+    // 3.Vehicle and InstituteCourses Relation (one-to-many)
+    Vehicle.hasMany(InstituteCourses, { foreignKey: "VehicleFK" })
+    InstituteCourses.belongsTo(Vehicle, { foreignKey: "VehicleFK" })
 
-    // 4.Instructor and CProductToInstitute Relation (one-to-many)
-    // Instructor.hasMany(CProductToInstitute, { foreignKey: "InstructorFK" })
-    // CProductToInstitute.belongsTo(Instructor, { foreignKey: "InstructorFK" })
+    // 4.InstituteCourses and Course Packages Relation (one-to-many) 
+    InstituteCourses.hasMany(CoursePackages, { foreignKey: "InstituteCourseFK" });
+    CoursePackages.belongsTo(InstituteCourses, { foreignKey: "InstituteCourseFK" });
 
-    // 5.CProductToInstitute and Course Packages Relation (one-to-many)
-    CProductToInstitute.hasMany(CoursePackage, { foreignKey: "cPI_Id" });
-    CoursePackage.belongsTo(CProductToInstitute, { foreignKey: "cPI_Id" });
-
-
-
+    Course.hasMany(InstituteCourses, { foreignKey: "CourseFK" })
+    InstituteCourses.belongsTo(Course, { foreignKey: "CourseFK" })
 
     // Vehicle and Vehicle Images Relation (one-to-many)
     Vehicle.hasMany(VehicleImages, { foreignKey: "VehicleFK" })
@@ -109,10 +92,6 @@ export const Realtions = () => {
     // Product and Book Relation (one-to-one)
     Book.belongsTo(Product, { foreignKey: 'ProductFK' });
     Product.hasOne(Book, { foreignKey: 'ProductFK' });
-
-
-    // Product and Course Relation (one-to-one)
-    // Product.belongsTo(Course, { foreignKey: 'CourseId' });
 
 
     // Book and BookReputation Info Relation
@@ -139,11 +118,11 @@ export const Realtions = () => {
     WishList.belongsTo(Product, { foreignKey: "WishedProduct" });
     WishList.belongsTo(User, { foreignKey: "StudentId" });
 
-    CourseEnrollment.belongsTo(CoursePackage, { foreignKey: "CoursePackageFK" });
-    CoursePackage.hasOne(CourseEnrollment, { foreignKey: "CoursePackageFK" });
+    CourseEnrollment.belongsTo(CoursePackages, { foreignKey: "CoursePackagesFK" });
+    CoursePackages.hasOne(CourseEnrollment, { foreignKey: "CoursePackagesFK" });
 
     CourseEnrollment.belongsTo(User, { foreignKey: "UserFK" });
     User.hasOne(CourseEnrollment, { foreignKey: "UserFK" });
-    // CourseEnrollment.belongsTo(Product, { foreignKey: "EnrolledProduct" });
+
 
 }  
