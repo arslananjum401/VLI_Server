@@ -32,9 +32,11 @@ export const Realtions = () => {
 
     // Course and License Type Relation
     Course.belongsTo(LicenseTypes, { foreignKey: 'LicenseTypeFK' });
+    LicenseTypes.hasMany(Course, { foreignKey: 'LicenseTypeFK' });
 
     // Course and Sub-License Type Relation
     Course.belongsTo(SubLicenseTypes, { foreignKey: 'SubLicenseTypeFK' });
+    SubLicenseTypes.hasMany(Course, { foreignKey: 'SubLicenseTypeFK' });
 
     // Course and Vehicle Types Relation
     Course.belongsTo(VehicleTypes, { foreignKey: 'VehicleTypeFK' });

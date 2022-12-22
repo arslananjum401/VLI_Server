@@ -49,7 +49,13 @@ const MulterForVehicleImages = (req, res, next) => {
     MulterVals.filetypes[3] = "image/svg+xml"
     MulterMiddleware(req, res, next, MulterVals)
 }
-
+const OptionalAuth = (req, res, next) => {
+    if (req.cookies) {
+        AuthenticatedUser(req, res, next)
+    } else {
+        next()
+    }
+}
 
 // Instructor APIs
 Irouter
@@ -84,7 +90,7 @@ Irouter
     .post("/institute/course/add", AuthenticatedUser, AuthenticateInstituteAdminUser, MulterForCourseCurriculum, DataParser, AddCourseToInstitute)
     .put("/institute/course/update", AuthenticatedUser, AuthenticateInstituteStaffUser, MulterForCourseCurriculum, DataParser, UpdateInstituteCourse)
     .get("/institute/courses", AuthenticatedUser, GetInstituteCourses)
-    .get("/institute/courses/:InstituteId", GetInstituteCourses)
+    .get("/institute/courses", AuthenticatedUser, AuthenticateInstituteAdminUser,GetInstituteCourses)
     .get("/institute/course/:InstituteCourseId", GetInstituteCourse)
     .delete("/institute/course/remove", AuthenticatedUser, AuthenticateInstituteStaffUser, RemoveCourseFromInstitute)
 

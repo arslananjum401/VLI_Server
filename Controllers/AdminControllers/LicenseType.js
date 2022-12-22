@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
-const {  LicenseTypes, SubLicenseTypes } = db;
+const { LicenseTypes, SubLicenseTypes, Course, InstituteCourses, CoursePackages, Institute } = db;
 
 
 export const CreateLicenseType = async (req, res) => {
@@ -84,6 +84,69 @@ export const GetAllLicenseTypes = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 }
+export const GetAllLicenseTypeCourses = async (req, res) => {
+
+    let IncludeQuery = {
+        include: {
+            model: Course,
+            attributes: ["CourseName", "Description", "CourseThumbnail"],
+            include: {
+                model: InstituteCourses,
+                attributes: ["InstituteCourseId", "ShortDescription"],
+                include: [{
+                    model: CoursePackages,
+                    attributes: ["CoursePackageId", "TotalFee","InstallmentSchedule"]
+                },
+
+                {
+                    model: Institute,
+                    attributes: ["InstituteName", "InstituteId", "Country", "State", "City"]
+                }
+                ]
+            }
+
+        }
+    }
+
+    try {
+        const GetLicenseTypes = await LicenseTypes.findOne({
+            where: {
+                Active: true,
+                LicenseTypeId: req.params.LicenseTypeId
+            },
+            include: {
+                model: SubLicenseTypes,
+            }
+        })
+
+        let Obj = {}
+        if (GetLicenseTypes.SubLicenseTypes.length > 0) {
+            Obj = {
+                include: {
+                    model: SubLicenseTypes
+                }
+            }
+            Object.assign(IncludeQuery, Obj)
+        } else {
+            Obj = IncludeQuery;
+        }
+
+
+        let AllCatgories = await LicenseTypes.findOne({
+            where: {
+                Active: true,
+                LicenseTypeId: req.params.LicenseTypeId
+            },
+            attributes: { exclude: ["Active", "SubLicenseType"] },
+            ...Obj
+        });
+
+        res.status(200).json(AllCatgories);
+    } catch (error) {
+        console.log(`error occurred while getting All LicenseTypes: ${error}`);
+        return res.status(500).json({ error: error.message });
+    }
+}
 
 export const LicenseTypeInfo = async (req, res) => {
     try {
@@ -101,7 +164,7 @@ export const LicenseTypeInfo = async (req, res) => {
 }
 
 export const GetLicenseTypesImage = async (req, res) => {
-    try { 
+    try {
         req.query.url = req.query.url.replaceAll('"', '')
 
         const FilePath = path.join(__dirname, `../../${req.query.url}`);

@@ -3,7 +3,7 @@ import { InstituteRequest, InstituteReqRes, AcceptedRequests, RejectedRequests, 
 import { CreateBook, DeleteBook, GetAllBooks, GetSingleBook, UpdateBook } from "../Controllers/AdminControllers/BookControllers.js";
 import { AddCountry, AddCountrysLicenseTypes, DeleteContryFromList, DeleteCountryLicenseType, GetCountriesList, GetSCountryWLicenseTypeList, UpdateCountry } from "../Controllers/AdminControllers/CountryControllers.js";
 import { DeleteCourse, GetAllCourses, GetCourse, NewCourse, UpdateCourse } from "../Controllers/AdminControllers/CoursesControllers.js";
-import { CreateLicenseType, DeleteLicenseType, GetAllLicenseTypes, GetLicenseTypesImage, UpdateLicenseType } from "../Controllers/AdminControllers/LicenseType.js";
+import { CreateLicenseType, DeleteLicenseType, GetAllLicenseTypeCourses, GetAllLicenseTypes, GetLicenseTypesImage, UpdateLicenseType } from "../Controllers/AdminControllers/LicenseType.js";
 import { CreateVehicleType, DeleteVehicleType, GetAllVehicleTypes, GetVehicleTypesImage, UpdateVehicleType } from "../Controllers/AdminControllers/VehicleType.js";
 import { PaypalTransaction } from "../Controllers/Transaction.js";
 import { AuthenticatedUser, AuthenticateUserType } from "../Middlewares/AuthenticateUser.js";
@@ -72,9 +72,7 @@ Aroutes
     .put('/course/update', AuthenticatedUser, AuthenticateAdminUser, MulterForCourseThumbnail, DataParser, UpdateCourse)//done
     .delete('/course', AuthenticatedUser, AuthenticateAdminUser, DeleteCourse)//done
     .get('/course/:CoursePK', GetCourse)
-    .get('/courses',
-        // AuthenticatedUser, AuthenticateAdminUser,
-        GetAllCourses);
+    .get('/courses', GetAllCourses);
 
 
 //  Countries APIs
@@ -88,9 +86,7 @@ Aroutes
 Aroutes
     .post('/country/licenseType/add', AuthenticatedUser, AuthenticateAdminUser, AddCountrysLicenseTypes)
     .delete('/country/licenseType/delete', AuthenticatedUser, AuthenticateAdminUser, DeleteCountryLicenseType)
-    .get('/country/:CountryPk',
-        // AuthenticatedUser, AuthenticateAdminUser, 
-        GetSCountryWLicenseTypeList)
+    .get('/country/:CountryPk', GetSCountryWLicenseTypeList)
 
 
 // Institute APIs
@@ -113,7 +109,8 @@ Aroutes
     .put('/LicenseType/update', AuthenticatedUser, AuthenticateAdminUser, MulterForLicenseType, DataParser, UpdateLicenseType)//Checked
     .delete('/LicenseType/delete', AuthenticatedUser, AuthenticateAdminUser, DeleteLicenseType)//Checked
     .get('/LicenseTypes', GetAllLicenseTypes)//Checked
-    .get('/LicenseType/image', GetLicenseTypesImage)//Checked
+    .get('/LicenseType/courses/:LicenseTypeId', GetAllLicenseTypeCourses)
+    .get('/LicenseType/image', GetLicenseTypesImage)
 
 //  SubLicenseType APIs
 Aroutes

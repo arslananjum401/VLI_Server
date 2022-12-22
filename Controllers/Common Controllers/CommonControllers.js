@@ -8,7 +8,7 @@ import { ArrangeCourseObject, ModifyCartObject } from '../../Helpers/ChangeObjec
 import { Paginate } from '../../Helpers/Paginate.js';
 
 
-const { Course, Institute, User: UserModel, StudentInterest, Notification, Book, Product, LicenseTypes, Cart, SubLicenseTypes, VehicleTypes, UserResetPassword, InstituteUser } = db;
+const { Course, Institute, User: UserModel, StudentInterest, Notification, Book, Product, LicenseTypes, Cart, SubLicenseTypes, VehicleTypes, UserResetPassword, InstituteUser, InstituteCourses } = db;
 
 export const CheckInstituteUser = async (CheckInstitute, UserId) => {
     if (CheckInstitute.User === "Institute") {
@@ -35,91 +35,78 @@ LicenseType
 CourseName
 */
 export const SearchCourse = async (req, res) => {
-    let models = []
-    let where = {};
-    if (req.query.ProductName !== "''" || req.query.ProductName !== undefined && req.query.ProductName !== '') {
-        let Query = {
-            where: {
-                ProductName: {
-                    [Op.iLike]: `%${req.query.ProductName}`
-                },
-                BookId: null
-            },
-            attributes: { exclude: ["BookId"] },
-            include: {
-                model: Course,
-                required: true,
 
+    let where = {
+        include: [{
+            model: InstituteCourses,
+            required: true,
+            attributes: ["ShortDescription", "InstituteCourseId"],
+            include: {
+                model: Institute,
+                attributes: ["InstituteName"]
             }
-        }
+        },]
+    };
+    if (req.query.CourseName !== "''" && (req.query.CourseName !== undefined && req.query.CourseName !== '')) {
+        let Query = { where: { CourseName: { [Op.iLike]: `%${req.query.CourseName}` } } }
         Object.assign(where, Query)
     }
 
+    let LicenseTypeModel
     if (req.query.LicenseType !== "''" && req.query.LicenseType !== undefined && req.query.LicenseType !== '') {
-        let x = {
+        LicenseTypeModel = {
             model: LicenseTypes,
+            where: { LicenseTypeName: { [Op.iLike]: `${req.query.LicenseType}` } },
+            attributes: ["LicenseTypeId", "LicenseTypeName"],
             required: true,
-            LicenseTypeName: {
-                [Op.iLike]: `${req.query.LicenseType}`
-            }
         }
 
-        models[models.length] = x;
-
-        let Query = {
-            include: models
-        }
-        Object.assign(where.include, Query);
+        where.include.push(LicenseTypeModel);
     }
 
     if (req.query.SubLicenseType !== "''" && req.query.SubLicenseType !== undefined && req.query.SubLicenseType !== '') {
-
+        let SubLicenseModel
         if (req.query.LicenseType) {
-            let Query = {
+            SubLicenseModel = {
                 include: {
                     model: SubLicenseTypes,
                     required: true,
-                    SubLicenseTypeName: {
-                        [Op.iLike]: `%${req.query.SubLicenseType}`
-                    }
+                    where: { SubLicenseTypeName: { [Op.iLike]: `%${req.query.SubLicenseType}` } }
                 }
             }
-            Object.assign(where.include.include, Query)
+            let LicenseTypeIndex = where.include.findIndex((element) => element === LicenseTypeModel)
+
+
+            Object.assign(SubLicenseModel, where.include[LicenseTypeIndex])
         } else {
-            models[models.length] = {
+            SubLicenseModel = {
                 model: LicenseTypes,
                 include: {
                     model: SubLicenseTypes,
                     required: true,
-                    SubLicenseTypeName: {
-                        [Op.iLike]: `%${req.params.SubLicenseType}`
-                    }
+                    where: { SubLicenseTypeName: { [Op.iLike]: `%${req.params.SubLicenseType}` } }
                 }
             }
 
-            let Query = {
-                include: models
-            }
-            Object.assign(where.include, Query)
+            where.include.push(SubLicenseModel);
         }
 
     }
 
     if (req.query.VehicleType !== "''" && req.query.VehicleType !== undefined && req.query.VehicleType !== '') {
-        models[models.length] = {
+        let Vehiclemodel = {
             model: VehicleTypes,
             where: { VehicleTypeName: { [Op.iLike]: `%${req.query.VehicleType}` } },
+            attributes: ["VehicleTypeId", "VehicleTypeName"],
             required: true
         }
 
-        let Query = {
-            include: models
-        }
-        Object.assign(where.include, Query)
+        where.include.push(Vehiclemodel);
     }
+    console.log(where)
     try {
-        let GetCourse = await Product.findAll({ ...where, ...Paginate(req.body) });
-        GetCourse = GetCourse.map(value => ArrangeCourseObject(value))
+        let GetCourse = await Course.findAll({ ...where, ...Paginate(req.body), attributes: ["CourseThumbnail", "CourseName"] });
+        // GetCourse = GetCourse.map(value => ArrangeCourseObject(value))
         res.status(200).json(GetCourse);
     } catch (error) {
         console.log(`error occurred while Searching course : ${error}`);
