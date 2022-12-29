@@ -7,7 +7,7 @@ export const SendResponse = async (req, res, User, StudentInterest, status) => {
     const options = {
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        sameSite:true,
+        // sameSite:true,
         // secure:true
     }
     User = await CheckInstituteUser(User.dataValues, User.dataValues.UserId);
@@ -16,6 +16,7 @@ export const SendResponse = async (req, res, User, StudentInterest, status) => {
     delete User.Password;
 
     return res
+        .header("Access-Control-Allow-Credentials", true)
         .status(status)
         .cookie("token", Token, options)
         .cookie("checkToken", Token, { expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000) })

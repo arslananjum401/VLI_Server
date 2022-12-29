@@ -206,7 +206,7 @@ export const CapturePayPalPayment = async (req, res) => {
     try {
 
         const { OrderId } = req.params;
-        // const { FindCreateBought } = await CheckCourseEnrollment(req, res);
+        const { FindCreateBought } = await CheckCourseEnrollment(req, res);
 
         // if (FindCreateBought) {
         //     return

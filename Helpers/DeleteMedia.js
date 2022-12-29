@@ -2,15 +2,22 @@ import fs from 'fs';
 import path from 'path';
 import { __dirname } from '../server.js';
 
-export const DeleteFile = async (VehicleImagesModel, OldImageObj) => {
+export const DeleteFile = async (ImagesModel, OldImageObj, ImagePath, PrimaryKey) => {
   try {
     let CheckDestruction
-    if (OldImageObj) {
-      CheckDestruction = await VehicleImagesModel.destroy({ where: { Vehicle_ImageId: OldImageObj.Vehicle_ImageId } })
-    }
+
+    if (OldImageObj && ImagesModel)
+      CheckDestruction = await ImagesModel.destroy({ where: { [PrimaryKey]: OldImageObj[PrimaryKey] } })
+    else
+      CheckDestruction = true;
+
+      
     let FilePath
+    if (!ImagePath)
+      ImagePath = OldImageObj.VehicleImageLink
+
     if (CheckDestruction) {
-      FilePath = path.join(__dirname, OldImageObj.VehicleImageLink);
+      FilePath = path.join(__dirname, ImagePath);
       fs.unlinkSync(FilePath)
     }
 

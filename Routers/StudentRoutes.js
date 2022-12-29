@@ -1,11 +1,13 @@
 import express from "express";
 import { BuyProducts, CapturePayPalPayment, CreatePayPalOrder } from "../Controllers/Student Controllers/CheckoutControllers.js";
-import { EnrollCourse, GetEnrolledCourses, GetUnEnrolledCourses, UnEnrollCourse, GetSingleEnrolledCourse } from "../Controllers/Student Controllers/EnrollCourseControllers.js";
+import { GetEnrolledCourses, GetUnEnrolledCourses, UnEnrollCourse, GetSingleEnrolledCourse } from "../Controllers/Student Controllers/EnrollCourseControllers.js";
 import { ViewCourses } from "../Controllers/Student Controllers/StudentCoursesControllers.js";
-import { GetWishlist, CreateWish, DeleteWish, AddInterest, ChangeInterest, RateCourse, AddToCart, GetFullCart, RemoveFromCart } from "../Controllers/StudentControllers.js";
+import { AddInterest, ChangeInterest, RateCourse, AddToCart, GetFullCart, RemoveFromCart } from "../Controllers/StudentControllers.js";
 import { PaypalTransaction } from "../Controllers/Transaction.js";
+import { CreateWish, DeleteWish, GetWishlist } from "../Controllers/Student Controllers/WishlistControllers.js";
 import { AuthenticatedUser } from "../Middlewares/AuthenticateUser.js";
 import { ConfirmPaymentIntent, CreateCustomer, CreatePaymentIntent } from "../Middlewares/StripePayment.js";
+import { BuyCourse } from "../Controllers/Student Controllers/BuyControllers.js";
 
 const Srouter = express.Router();
 const OptionalAuthenticatedUser = async (req, res, next) => {
@@ -27,9 +29,8 @@ Srouter
 
 //EnrollCourse
 Srouter
-    .post('/enrollCourse', AuthenticatedUser, EnrollCourse)
     .get('/enrollCourse', AuthenticatedUser, GetEnrolledCourses)
-    .get('/enrollCourse/:CoursePK', AuthenticatedUser, GetSingleEnrolledCourse)
+    .get('/enrollCourse/:EnrollmentId', AuthenticatedUser, GetSingleEnrolledCourse)
     .post('/Course/rating', AuthenticatedUser, RateCourse)
     .put('/enrollCourse', AuthenticatedUser, UnEnrollCourse)
     .get('/unenrollCourse', AuthenticatedUser, GetUnEnrolledCourses);
@@ -42,14 +43,14 @@ Srouter
     .get('/cart', AuthenticatedUser, GetFullCart)
 
 //Buy Product
-// Srouter.get('/buy', AuthenticatedUser, PayWithPaypal)
+Srouter.post('/buy/course', AuthenticatedUser, BuyCourse)
 Srouter.post('/orders', AuthenticatedUser, CreatePayPalOrder)
-Srouter.post('/orders/:OrderId/capture', AuthenticatedUser, CapturePayPalPayment)
+Srouter.post('/orders/:OrderId/capture', AuthenticatedUser, CapturePayPalPayment);
 
 
 // .post('/paymentIntent/create', AuthenticatedUser, CreateCustomer, CreatePaymentIntent)
 // .post('/Customer/create', AuthenticatedUser, CreateCustomer)
 // .post('/paymentIntent/confirm', AuthenticatedUser, ConfirmPaymentIntent)
-Srouter.get('/a/paypal',PaypalTransaction)
+Srouter.get('/a/paypal', PaypalTransaction)
 Srouter.post('/buy/course', AuthenticatedUser, BuyProducts)
 export default Srouter;

@@ -146,7 +146,7 @@ export const CheckRunningMark = async (EnrolledCourse) => {
                 where: { CoursePK: EnrolledCourse.EnrolledCourse }
             });
 
-        console.log(GetCourse.RunningCourse);
+
 
         GetCourse = await GetCourse.update(
             { RunningCourse: GetCourse.RunningCourse + 1 },

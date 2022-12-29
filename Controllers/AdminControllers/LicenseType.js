@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
-const { LicenseTypes, SubLicenseTypes, Course, InstituteCourses, CoursePackages, Institute } = db;
+const { LicenseTypes, SubLicenseTypes, Course, InstituteCourses, CoursePackages, Institute, WishList } = db;
 
 
 export const CreateLicenseType = async (req, res) => {
@@ -93,15 +93,11 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
             include: {
                 model: InstituteCourses,
                 attributes: ["InstituteCourseId", "ShortDescription"],
-                include: [{
-                    model: CoursePackages,
-                    attributes: ["CoursePackageId", "TotalFee","InstallmentSchedule"]
-                },
+                include: [
+                    { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"] },
 
-                {
-                    model: Institute,
-                    attributes: ["InstituteName", "InstituteId", "Country", "State", "City"]
-                }
+                    { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"] },
+
                 ]
             }
 
@@ -118,8 +114,16 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
                 model: SubLicenseTypes,
             }
         })
-
-        let Obj = {}
+        if (req.UserId) {
+            let Wish = {
+                model: WishList, attributes: ["WishId", "StudentId"],
+                where: { StudentId: req.UserId },
+                required: false
+            }
+            IncludeQuery?.include?.include?.include.push(Wish)
+        }
+        
+        let Obj = {};
         if (GetLicenseTypes.SubLicenseTypes.length > 0) {
             Obj = {
                 include: {
@@ -130,6 +134,7 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
         } else {
             Obj = IncludeQuery;
         }
+
 
 
         let AllCatgories = await LicenseTypes.findOne({

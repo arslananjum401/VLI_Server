@@ -65,6 +65,13 @@ const MulterForLicenseType = (req, res, next) => {
 
     MulterMiddleware(req, res, next, MulterVals)
 }
+const AuthenticateOptional = async (req, res, next) => {
+    const { token } = await req.cookies;
+    if (token)
+        AuthenticatedUser(req, res, next)
+    else
+        next()
+}
 
 // Course APIs
 Aroutes
@@ -109,7 +116,7 @@ Aroutes
     .put('/LicenseType/update', AuthenticatedUser, AuthenticateAdminUser, MulterForLicenseType, DataParser, UpdateLicenseType)//Checked
     .delete('/LicenseType/delete', AuthenticatedUser, AuthenticateAdminUser, DeleteLicenseType)//Checked
     .get('/LicenseTypes', GetAllLicenseTypes)//Checked
-    .get('/LicenseType/courses/:LicenseTypeId', GetAllLicenseTypeCourses)
+    .get('/LicenseType/courses/:LicenseTypeId', AuthenticateOptional, GetAllLicenseTypeCourses)
     .get('/LicenseType/image', GetLicenseTypesImage)
 
 //  SubLicenseType APIs

@@ -6,9 +6,11 @@ const { Institute, InstituteUser, User: UserModel, UserEmailValidation } = db;
 export const AuthenticatedUser = async (req, res, next) => {
     try {
         const { token } = await req.cookies;
+
         if (!token) {
             return res.status(401).json({ message: "Pleases login first" })
         }
+
 
         const decoded = JWT.verify(token, process.env.SecretKey);
 

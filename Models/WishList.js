@@ -1,16 +1,17 @@
-export const WishListModel = async (sequelize, DataTypes, ProductModel, UserModel) => {
+export const WishListModel = async (sequelize, DataTypes, InstituteCourseModel, UserModel) => {
     const WishList = await sequelize.define('WishList', {
         WishId: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
-        WishedProduct: {
+        ProductFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: ProductModel,
-                key: 'ProductId',
+                model: InstituteCourseModel,
+                onDelete: 'CASCADE',
+                key: 'InstituteCourseId'
             }
         },
         StudentId: {

@@ -1,4 +1,4 @@
-export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageModel, UserModel, BoughtCourseModel) => {
+export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageModel, UserModel, BoughtCoureModel) => {
     const CourseEnrollment = await sequelize.define('CourseEnrollment', {
         EnrollmentId: {
             type: DataTypes.UUID,
@@ -9,7 +9,7 @@ export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageM
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: CoursePackageModel, 
+                model: CoursePackageModel,
                 key: 'CoursePackageId'
             }
         },
@@ -19,55 +19,19 @@ export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageM
             allowNull: false,
             references: {
                 model: UserModel,
-                key: 'UserId' 
+                key: 'UserId'
             }
         },
+
         BoughtCourseFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: BoughtCourseModel,
+                model: BoughtCoureModel,
                 key: "BoughtCourseId"
             }
         },
 
-
-
-         
-
-        EnrollmentPeriod: {
-            type: DataTypes.STRING,
-            // allowNull: false, 
-        },
-        EnrollmentDescription: {
-            type: DataTypes.STRING(2134),
-        },
-     
-     
-
-
-
-
-        CourseRating: {
-            type: DataTypes.FLOAT,
-            defaultValue: 0
-        },
-        Rated: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
-        Completion: {
-            type: DataTypes.FLOAT,
-            defaultValue: 0
-        },
-        CompletionMark: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
-        RunningMarked: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
     },
         {
             timestamps: true,

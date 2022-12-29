@@ -1,7 +1,7 @@
 import express from "express";
 import { GetCourseHistory, } from '../Controllers/AdminControllers/CoursesControllers.js';
 import { AcceptForwardedCourse, ForwardCourseTostaff, GetAcceptedForwardedCourses, GetForwardedCourses, GetSingleForwardedCourse } from "../Controllers/Institute Controllers/ForwardCourse.js";
-import { AddCourseToInstitute, GetInstituteCourses, GetInstituteCourse, RemoveCourseFromInstitute, UpdateInstituteCourse } from "../Controllers/Institute Controllers/InstituteCourseControllers.js";
+import { AddCourseToInstitute, GetInstituteCourses, RemoveCourseFromInstitute, UpdateInstituteCourse, GetSingleInstituteCourse } from "../Controllers/Institute Controllers/InstituteCourseControllers.js";
 import { CreateInstructor, UpdateInstructor, GetAllInstructors, DeleteInstructors, GetSingleInstructor, StudentReport, GetCourseReport, GetAvailableInstrutors } from "../Controllers/Institute Controllers/InstructorController.js";
 import { AddStaff, DeleteStaffMemembers, GetAllStaffMemembers, GetSingleStaffMemember } from "../Controllers/Institute Controllers/StaffControllers.js";
 import { AddVehicle, GetAllVehicles, GetSingleVehicle, RemoveVehicle, RemoveVehicleImage, UpdateVehicle } from "../Controllers/Institute Controllers/VehicleControllers.js";
@@ -75,24 +75,22 @@ Irouter
 
 
 Irouter
-    .get('/course/status/:Publish', AuthenticatedUser, AuthenticateInstituteAdminUser, GetInstituteCourse)
+    .get('/course/status/:Publish', AuthenticatedUser, AuthenticateInstituteAdminUser, GetSingleInstituteCourse)
     .put('/course/response/:cProductInstituteId', AuthenticatedUser, AuthenticateInstituteAdminUser, AcceptForwardedCourse)
-
-
 
 
 
 Irouter.get('/staff/course/forward', AuthenticatedUser, AuthenticateInstituteStaffUser, GetForwardedCourses)
 
 
-// Edit Course for Inventory
+// Edit Course for Inventory 
 Irouter
     .post("/institute/course/add", AuthenticatedUser, AuthenticateInstituteAdminUser, MulterForCourseCurriculum, DataParser, AddCourseToInstitute)
     .put("/institute/course/update", AuthenticatedUser, AuthenticateInstituteStaffUser, MulterForCourseCurriculum, DataParser, UpdateInstituteCourse)
-    .get("/institute/courses", AuthenticatedUser, GetInstituteCourses)
-    .get("/institute/courses", AuthenticatedUser, AuthenticateInstituteAdminUser,GetInstituteCourses)
-    .get("/institute/course/:InstituteCourseId", GetInstituteCourse)
     .delete("/institute/course/remove", AuthenticatedUser, AuthenticateInstituteStaffUser, RemoveCourseFromInstitute)
+    .get("/institute/courses", AuthenticatedUser, GetInstituteCourses)
+    .get("/institute/course/:InstituteCourseId",   GetSingleInstituteCourse)
+    // .get("/institute/courses", AuthenticatedUser, AuthenticateInstituteAdminUser, GetInstituteCourses)
 
 //  Staff APIs
 Irouter

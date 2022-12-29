@@ -1,22 +1,23 @@
 import { ProgressBar } from './Helpers.js';
 import db from '../Conn/connection.js'
 const { Course, sequelize, CourseEnrollment } = db;
+
 export const ModifyCourseEnrollmentObj = async (EnrolledCourse) => {
-    let SEnrolledCoursedata = {}
-    SEnrolledCoursedata = EnrolledCourse;
+    // let SEnrolledCoursedata = {}
+    // SEnrolledCoursedata = EnrolledCourse;
 
-    if (EnrolledCourse) {
+    // if (EnrolledCourse) {
 
-        let Result = await ProgressBar(EnrolledCourse);
-        SEnrolledCoursedata.Progress = Result;
-        const Progress = SEnrolledCoursedata.Progress;
-        SEnrolledCoursedata = { ...SEnrolledCoursedata, Progress }
-        delete SEnrolledCoursedata.Completion
-    }
+    //     let Result = await ProgressBar(EnrolledCourse);
+    //     SEnrolledCoursedata.Progress = Result;
+    //     const Progress = SEnrolledCoursedata.Progress;
+    //     SEnrolledCoursedata = { ...SEnrolledCoursedata, Progress }
+    //     delete SEnrolledCoursedata.Completion
+    // }
 
 
 
-    return SEnrolledCoursedata
+    return EnrolledCourse
 }
 
 // "CourseSubLicenseType":"0e3544f6-7f77-41d4-94b9-1540d633a053",
@@ -24,15 +25,15 @@ export const ArrangeCourseObject = (value) => {
 
     const CourseInfo = value.dataValues.Course.dataValues;
     delete value.dataValues.Course;
-    
+
     CourseInfo.LicenseType = CourseInfo?.LicenseType?.dataValues;
     CourseInfo.VehicleType = CourseInfo?.VehicleType?.dataValues;
 
     if (CourseInfo?.SubLicenseType) {
-        CourseInfo.LicenseType.SubLicenseType=CourseInfo?.SubLicenseType?.dataValues;
-        delete  CourseInfo?.SubLicenseType?.dataValues;
+        CourseInfo.LicenseType.SubLicenseType = CourseInfo?.SubLicenseType?.dataValues;
+        delete CourseInfo?.SubLicenseType?.dataValues;
     }
-    
+
 
     value = { ...value.dataValues, Course: CourseInfo, };
 
@@ -42,24 +43,6 @@ export const ArrangeCourseObject = (value) => {
     return value
 }
 
-
-export const ModifyWishListObject = (value) => {
-    const Product = value.dataValues.Product.dataValues;
-    delete value.dataValues.Product;
-
-    let Course;
-    if (Product.Course) {
-        Course = Product.Course.dataValues;
-        delete Product.Course
-    }
-    let Book;
-    if (Product.Book) {
-        Book = Product.Book.dataValues;
-        delete Product.Book
-    }
-
-    return value = { ...value?.dataValues, ...Product,  ...Course, ...Book }
-}
 
 export const ModifyCartObject = (value) => {
 

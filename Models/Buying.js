@@ -15,9 +15,12 @@ export const BuyingModel = async (sequelize, Datatypes, UserModel) => {
                 key: 'UserId'
             }
         },
-        Address: {
-            type: Datatypes.STRING,
-        },
+
+        TotalPrice: {
+            type: Datatypes.FLOAT,
+            allowNull: false,
+
+        }
 
     },
         {
@@ -28,95 +31,59 @@ export const BuyingModel = async (sequelize, Datatypes, UserModel) => {
     return Buying
 }
 
-export const BoughtModel = async (sequelize, Datatypes, ProductModel, UserModel) => {
-    const OrderProduct = await sequelize.define('BoughtProduct', {
 
-        BoughtId: {
-            type: Datatypes.UUID,
-            allowNull: false,
-            primaryKey: true,
-            defaultValue: Datatypes.UUIDV4
-        },
-        // ProductFK: {
-        //     type: Datatypes.UUID,
-        //     allowNull: false,
-        //     references: {
-        //         model: ProductModel,
-        //         key: 'ProductId'
-        //     }
-        // },
-        UserFK: {
-            type: Datatypes.UUID,
-            allowNull: false,
-            references: {
-                model: UserModel,
-                key: "UserId"
-            }
-        },
-        TotalPrice: {
-            type: Datatypes.FLOAT,
-            allowNull: false,
-           
-        },
-
-    },
-        {
-            timestamps: true,
-            createdAt: true,
-            updatedAt: false,
-        })
-    return OrderProduct
-}
-
-export const BoughtCourseModel = async (sequelize, Datatypes, BoughtModel, CoursePackagesModel) => {
-    const OrderProduct = await sequelize.define('BoughtCourse', {
+export const BoughtCourseModel = async (sequelize, Datatypes, CoursePackagesModel, BuyingModel) => {
+    return await sequelize.define('BoughtCourse', {
         BoughtCourseId: {
             type: Datatypes.UUID,
             allowNull: false,
             primaryKey: true,
             defaultValue: Datatypes.UUIDV4
         },
-        BoughtFK: {
+        BuyingFK: {
             type: Datatypes.UUID,
             allowNull: false,
             references: {
-                model: BoughtModel,
-                key: "BoughtId"
+                model: BuyingModel,
+                key: "BuyingId"
             }
+        },
+        RemainingPrice: {
+            type: Datatypes.FLOAT,
+            allowNull: false,
+            defaultValue: 0
         },
         CoursePackageFK: {
             type: Datatypes.UUID,
-            allowNull: false, 
+            allowNull: false,
             references: {
                 model: CoursePackagesModel,
                 key: "CoursePackageId"
             }
-        },
-
-
+        }
     },
         {
             timestamps: true,
             createdAt: true,
             updatedAt: false,
         })
-    return OrderProduct
+
 }
 
-export const BoughtBookModel = async (sequelize, Datatypes, BoughtModel, BookModel) => {
-    const OrderProduct = await sequelize.define('BoughtBook', {
+export const BoughtBookModel = async (sequelize, Datatypes, BookModel, BuyingModel) => {
+    return await sequelize.define('BoughtBook', {
         BoughtBookId: {
             type: Datatypes.UUID,
             allowNull: false,
             primaryKey: true,
             defaultValue: Datatypes.UUIDV4
         },
-        BoughtFK: {
+        BuyingFK: {
             type: Datatypes.UUID,
             allowNull: false,
             references: {
-                model: BoughtModel,
-                key: "BoughtId"
+                model: BuyingModel,
+                key: "BuyingId"
             }
         },
         BookFK: {
@@ -127,14 +94,15 @@ export const BoughtBookModel = async (sequelize, Datatypes, BoughtModel, BookMod
                 key: "BookId"
             }
         },
-
-
+        Address: {
+            type: Datatypes.STRING,
+        },
     },
         {
             timestamps: true,
             createdAt: true,
             updatedAt: false,
         })
-    return OrderProduct
+
 }
 

@@ -24,13 +24,19 @@ export const Stripe = stripe(process.env.STRIPE_SECRET_KEY)
 
 const app = Express();
 const server = http.createServer(app)
-const io = new Server(server, {
+const CorsOptions = {
   cors: {
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000/"],
+    credentials: true,
   }
-});
+}
 
-app.use(cors())
+const io = new Server(server, { ...CorsOptions });
+
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}))
 const Port = process.env.PORT || 9000
 
 SocketFunction(io)
@@ -41,12 +47,18 @@ app.use(Express.json({ limit: "50mb" }))
 app.use('/api', Irouter);
 app.use('/api', Aroutes)
 app.use('/api', Srouter);
-app.use('/api', CRoutes)
+app.use('/api', CRoutes) 
 
-
-
+   
+app.use(Express.static(path.join(__dirname, "../client-4/build")))
 Realtions();
+if (process.env.NODE_ENV === 'production') {
+  const a = path.join(__dirname, "../client-4/build/index.html")
+  app.get("*", (req, res) => {
 
+    res.sendFile(a);
+  });
+}
 
 server.listen(Port, () => {
   console.log(`App  is  runnging on port ${Port}`)

@@ -2,13 +2,17 @@ import { Sequelize, DataTypes } from 'sequelize';
 import { LicenseTypeModel, SubLicenseTypeModel, CourseModel, VehicleTypesModel, CountryModel, CountryLicenseTypeModel, bookModel, BookReputationInfo } from '../Models/Admin.js';
 import { CourseEnrollmentModel } from '../Models/CourseErnrollment.js';
 import { WishListModel } from '../Models/WishList.js';
-import { CourseInstructorsModel, InstituteCourseModel, ForwardedCourseModel, Institute, CoursePackagesModel, InstructorModel, VehicleImagesModel, VehicleModel } from '../Models/Institute.js';
+import { ForwardedCourseModel, Institute, } from '../Models/Institute.js';
 import { NotificationModel } from '../Models/Notifications.js';
 import { StudentInterestModel } from '../Models/StudentInterest.js';
 import { InstituteUsersModel, UserModel, UserEmailValidationModel, UserResetPasswordModel } from '../Models/User.js';
-import { BuyingModel, BoughtModel, BoughtCourseModel, BoughtBookModel } from '../Models/Buying.js';
+import { BuyingModel, BoughtCourseModel, BoughtBookModel } from '../Models/Buying.js';
 import { CartModel } from '../Models/Cart.js';
 import { ProductModel } from '../Models/Product.js';
+import { InstructorModel } from '../Models/Institute/Instructor.js';
+import { VehicleImagesModel, VehicleModel } from '../Models/Institute/Vehicle.js';
+import { ClassScheduleModel, CoursePackagesModel, CourseSyllabusModel, InstituteCourseModel } from '../Models/Institute/InstituteCourse.js';
+import { CourseInstructorsModel } from '../Models/Institute/InstituteCourseRelation.js';
 
 export const sequelize = new Sequelize(
     'frkmgtsm',//Databse name
@@ -52,22 +56,26 @@ db.Book = await bookModel(sequelize, DataTypes, db.User, db.Product);
 db.Instructor = await InstructorModel(sequelize, DataTypes, db.Institute, db.LicenseTypes, db.User);
 
 db.Notification = await NotificationModel(sequelize, DataTypes, db.User);
-db.WishList = await WishListModel(sequelize, DataTypes, db.Product, db.User);
 db.StudentInterest = await StudentInterestModel(sequelize, DataTypes, db.User, db.LicenseTypes);
 
 db.Vehicle = await VehicleModel(sequelize, DataTypes, db.Institute);
 db.VehicleImages = await VehicleImagesModel(sequelize, DataTypes, db.Vehicle)
 
-db.Buying = await BuyingModel(sequelize, DataTypes, db.User, db.Product);
 
 
 db.InstituteCourses = await InstituteCourseModel(sequelize, DataTypes, db.Institute, db.Vehicle, db.Course);
 db.CoursePackages = await CoursePackagesModel(sequelize, DataTypes, db.InstituteCourses)
-db.CourseInstructors = await CourseInstructorsModel(sequelize, DataTypes, db.InstituteCourses, db.Instructor)
+db.CourseInstructors = await CourseInstructorsModel(sequelize, DataTypes, db.InstituteCourses, db.Instructor);
+ 
+db.CourseSyllabus = await CourseSyllabusModel(sequelize, DataTypes, db.InstituteCourses)
+db.ClassSchedule = await ClassScheduleModel(sequelize, DataTypes, db.InstituteCourses)
 
-db.Bought = await BoughtModel(sequelize, DataTypes, db.Product, db.User);
-db.BoughtCourse = await BoughtCourseModel(sequelize, DataTypes, db.Bought, db.CoursePackages);
-db.BoughtBook = await BoughtBookModel(sequelize, DataTypes, db.Bought, db.Book);
+db.WishList = await WishListModel(sequelize, DataTypes, db.InstituteCourses, db.User);
+
+
+db.Buying = await BuyingModel(sequelize, DataTypes, db.User, db.Product);
+db.BoughtCourse = await BoughtCourseModel(sequelize, DataTypes, db.CoursePackages, db.Buying);
+db.BoughtBook = await BoughtBookModel(sequelize, DataTypes, db.Book, db.Buying);
 
 
 db.CourseEnrollment = await CourseEnrollmentModel(sequelize, DataTypes, db.CoursePackages, db.User, db.BoughtCourse);
@@ -78,4 +86,4 @@ db.ForwardedCourse = await ForwardedCourseModel(sequelize, DataTypes, db.Institu
 db.BookReputationInfo = await BookReputationInfo(sequelize, DataTypes, db.Book)
 export default db;
 
-sequelApp();
+sequelApp();  
