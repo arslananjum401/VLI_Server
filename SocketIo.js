@@ -1,5 +1,6 @@
 import db from "./Conn/connection.js"
 import { CheckInstituteUser } from "./Controllers/Common Controllers/CommonControllers.js";
+ 
 const { Notification, Admin, Institute, User: UserModel } = db
 
 let AdminUserIds = [];

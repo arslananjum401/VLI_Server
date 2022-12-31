@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { __dirname } from '../server.js';
+import { __dirname } from '../app.js';
 
 export const DeleteFile = async (ImagesModel, OldImageObj, ImagePath, PrimaryKey) => {
   try {

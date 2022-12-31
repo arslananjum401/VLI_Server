@@ -14,7 +14,7 @@ const Query = [
     },
     { model: Vehicle, attributes: ["VehicleId", "ManufacturingCompany", "Model", "Year", "PlateNumber"] },
     { model: CoursePackages, attributes: ["CoursePackageId", "DrivingHours", "InClassHours", "OnlineHours", "TotalFee"] },
-    { model: Course, attributes: ["CoursePK", "Description", "RunningCourse", "Promotion"] },
+    { model: Course, attributes: ["CoursePK", "Description", "RunningCourse", "Promotion", "CourseName"] },
     { model: Institute, attributes: ["InstituteName"] },
     { model: CourseSyllabus, attributes: { exclude: ["InstituteCourseFK"] } },
     { model: ClassSchedule, attributes: { exclude: ["InstituteCourseFK"] } },

@@ -1,7 +1,7 @@
 import { request } from "express";
 import stripe from "stripe";
 import db from '../Conn/connection.js';
-import { Stripe } from '../server.js'
+import { Stripe } from '../app.js'
 import { SendReceipt } from "./SendEmailToVerify.js";
 const { User, Product } = db;
 
