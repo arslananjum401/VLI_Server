@@ -62,10 +62,10 @@ app.use('/api', Srouter);
 app.use('/api', CRoutes)
 
 
-app.use(Express.static(path.join(__dirname, "../client-4/build")))
+app.use(Express.static(path.join(__dirname, "./build")))
 Realtions();
 if (process.env.NODE_ENV === 'production') {
-  const a = path.join(__dirname, "../client-4/build/index.html")
+  const a = path.join(__dirname, "./index.html")
   app.get("*", (req, res) => {
 
     res.sendFile(a);
