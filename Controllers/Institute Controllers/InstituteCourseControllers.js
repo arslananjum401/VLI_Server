@@ -89,6 +89,7 @@ export const AddCourseToInstitute = async (req, res) => {
 
 export const UpdateInstituteCourse = async (req, res) => {
     req.body.Publish = false
+    const { CoursePackages: CoursePackagesArr } = req.body
     try {
         const GetInstituteCourse = await InstituteCourses.findOne({
             where: { InstituteCourseId: req.body.InstituteCourseId },
@@ -96,15 +97,26 @@ export const UpdateInstituteCourse = async (req, res) => {
 
         if (!GetInstituteCourse) return res.status(404).json({ message: "Course not found or has been deleted" })
 
+        if (req.body.UpdateCourseCurriculum)
+            req.body.CourseCurriculum = req.body.UpdateCourseCurriculum
 
-        req.body.CourseCurriculum = req.body.UpdateCourseCurriculum
-        const UpdateCourse = await InstituteCourses.update(req.body, { where: { InstituteCourseId: req.body.InstituteCourseId } })
+
+        if (req.body.InstituteCourseId) {
+            const UpdateCourse = await InstituteCourses.update(req.body, { where: { InstituteCourseId: req.body.InstituteCourseId } });
+        }
+
+
+        if (CoursePackagesArr?.length > 0) {
+            await CoursePackagesArr.forEach(async (value) => {
+                const UpdateCoursePackage = await CoursePackages.update(value, { where: { CoursePackageId: value.CoursePackageId } })
+            })
+        }
 
         if (req.body.UpdateCourseCurriculum)
             DeleteFile(InstituteCourses, GetInstituteCourse, GetInstituteCourse.CourseCurriculum, "InstituteCourseId")
 
         const GetUpdatedInstituteCourse = await InstituteCourses.findOne({
-            where: { cProudctInstituteId: req.body.cProudctInstituteId },
+            where: { InstituteCourseId: req.body.InstituteCourseId },
             include: Query
         })
         ParseFAQs(GetUpdatedInstituteCourse);

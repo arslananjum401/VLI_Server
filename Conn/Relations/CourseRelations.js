@@ -34,8 +34,8 @@ export function InstituteCourseRelations() {
     Institute.hasMany(InstituteCourses, { foreignKey: "InstituteFK" })
     InstituteCourses.belongsTo(Institute, { foreignKey: "InstituteFK" })
 
-    Vehicle.hasMany(InstituteCourses, { foreignKey: "VehicleFK" })
-    InstituteCourses.belongsTo(Vehicle, { foreignKey: "VehicleFK" })
+    Vehicle.hasMany(InstituteCourses, { onUpdate: "CASCADE", foreignKey: "VehicleFK" })
+    InstituteCourses.belongsTo(Vehicle, { onUpdate: "CASCADE", foreignKey: "VehicleFK" })
 
     InstituteCourses.hasMany(CoursePackages, { foreignKey: "InstituteCourseFK" });
     CoursePackages.belongsTo(InstituteCourses, { foreignKey: "InstituteCourseFK" });

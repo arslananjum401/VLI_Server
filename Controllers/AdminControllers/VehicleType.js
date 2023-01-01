@@ -25,6 +25,7 @@ export const CreateVehicleType = async (req, res) => {
 export const UpdateVehicleType = async (req, res) => {
     try {
         const UpdatedVehicleType = await VehicleTypes.update(req.body, { where: { VehicleTypeId: req.body.VehicleTypeId } });
+       
         const GetUpdatedVehicleType = await VehicleTypes.findOne({ where: { VehicleTypeId: req.body.VehicleTypeId } });
         res.status(200).json(GetUpdatedVehicleType)
     } catch (error) {

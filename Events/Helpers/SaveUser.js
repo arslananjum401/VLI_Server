@@ -11,22 +11,35 @@ export const AddUserToArr = (UserArr, NewUser) => {
     )
     if (!Check)
         UserArr.push([NewUser])
-        
+
     return UserArr
 }
 export const RemoveUserFromArr = (UserArr, RemoveUser) => {
     return UserArr?.filter((value, index) => {
         let arr = value?.filter((ChildValue) => {
-            let { SocketId } = ChildValue;
-            if (RemoveUser.SocketId !== SocketId) {
-                // console.log(RemoveUser.SocketId, SocketId)
+            const { SocketId } = ChildValue;
+            if (RemoveUser.SocketId !== SocketId)
                 return ChildValue
-            }
-
         })
 
         return arr.length !== 0
     })
 
 
+}
+
+
+export const FindUserId = (UserArr, SocketId) => {
+    let User
+    UserArr.forEach((value, Index) => {
+        value.forEach((ChildValue, ChildIndex) => {
+            const { SocketId: SavedSocketId } = ChildValue
+            
+            if (SavedSocketId === SocketId) {
+                User = ChildValue
+            }
+        })
+    })
+
+    return User
 }

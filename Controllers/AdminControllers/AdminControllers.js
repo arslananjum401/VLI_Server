@@ -138,6 +138,7 @@ export const UpdateSubLicenseType = async (req, res) => {
         const UpdateLicenseType = await SubLicenseTypes.update(req.body, {
             where: { SubLicenseTypeId: req.body.SubLicenseTypeId }
         })
+        
         const GetUpdatedLicenseType = await SubLicenseTypes.findOne({ where: { SubLicenseTypeId: req.body.SubLicenseTypeId } });
 
         res.status(200).json(GetUpdatedLicenseType);

@@ -97,11 +97,10 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
                     { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"] },
 
                     { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"] },
-
                 ]
             }
-
-        }
+        },
+        order: []
     }
 
     try {
@@ -122,7 +121,7 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
             }
             IncludeQuery?.include?.include?.include.push(Wish)
         }
-        
+
         let Obj = {};
         if (GetLicenseTypes.SubLicenseTypes.length > 0) {
             Obj = {
@@ -134,7 +133,6 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
         } else {
             Obj = IncludeQuery;
         }
-
 
 
         let AllCatgories = await LicenseTypes.findOne({
@@ -155,7 +153,7 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
 
 export const LicenseTypeInfo = async (req, res) => {
     try {
-        console.log(req.params.LicenseTypeId)
+
         const SLicenseTypeInfo = await LicenseTypes.findOne({
             where: { LicenseTypeId: req.params.LicenseTypeId },
             attributes: ["LicenseTypeId", "LicenseTypeName"],
