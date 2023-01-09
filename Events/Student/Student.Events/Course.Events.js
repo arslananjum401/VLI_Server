@@ -5,19 +5,24 @@ import { IncludeQuery } from "./Includes.js";
 const { LicenseTypes, SubLicenseTypes, WishList, Course, InstituteCourses, CoursePackages } = db;
 
 export const SortCourses = async (Props, Arr, socket, io) => {
+
+    if (Props.FilterValue === "Most_Relevant")
+        delete IncludeQuery.order
+    else {
+        if (!IncludeQuery.order) {
+            IncludeQuery.order = []
+        }
+        if (Props.FilterValue === "High_Price")
+            IncludeQuery.order[0] = [Course, InstituteCourses, CoursePackages, "TotalFee", "DESC"]
+
+        else if (Props.FilterValue === "Low_price")
+            IncludeQuery.order[0] = [Course, InstituteCourses, CoursePackages, "TotalFee", "ASC"]
+
+        else if (Props.FilterValue === "Most_Recent")
+            IncludeQuery.order[0] = [Course, InstituteCourses, "createdAt", "DESC"]
+    }
+
     const User = FindUserId(Arr, socket.id);
-    if (Props.FilterValue === "High_Price")
-        IncludeQuery.order[0] = [Course, InstituteCourses, CoursePackages, "TotalFee", "DESC"]
-
-    else if (Props.FilterValue === "Low_price")
-        IncludeQuery.order[0] = [Course, InstituteCourses, CoursePackages, "TotalFee", "ASC"]
-
-    else if (Props.FilterValue === "Most_Recent")
-        IncludeQuery.order[0] = [Course, InstituteCourses, "createdAt", "DESC"]
-
-    else if (Props.FilterValue === "Most_Relevant")
-        IncludeQuery.order[0] = undefined;
-
 
     try {
 
@@ -64,7 +69,7 @@ export const SortCourses = async (Props, Arr, socket, io) => {
         });
 
         // await io.to(User.SocketId).emit("ReceiveSortedCourse", AllCatgories)
-        await socket.emit("ReceiveSortedCourse", AllCatgories); 
+        await socket.emit("ReceiveSortedCourse", AllCatgories);
     }
     catch (err) {
         console.log(`Error occurrred while sorting courses: ${err}`)

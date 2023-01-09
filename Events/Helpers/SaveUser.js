@@ -21,7 +21,6 @@ export const RemoveUserFromArr = (UserArr, RemoveUser) => {
             if (RemoveUser.SocketId !== SocketId)
                 return ChildValue
         })
-
         return arr.length !== 0
     })
 

@@ -1,6 +1,6 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import { LicenseTypeModel, SubLicenseTypeModel, CourseModel, VehicleTypesModel, CountryModel, CountryLicenseTypeModel, bookModel, BookReputationInfo } from '../Models/Admin.js';
-import { CourseEnrollmentModel } from '../Models/CourseErnrollment.js';
+
 import { WishListModel } from '../Models/WishList.js';
 import { ForwardedCourseModel, Institute, } from '../Models/Institute.js';
 import { NotificationModel } from '../Models/Notifications.js';
@@ -13,6 +13,8 @@ import { InstructorModel } from '../Models/Institute/Instructor.js';
 import { VehicleImagesModel, VehicleModel } from '../Models/Institute/Vehicle.js';
 import { ClassScheduleModel, CoursePackagesModel, CourseSyllabusModel, InstituteCourseModel } from '../Models/Institute/InstituteCourse.js';
 import { CourseInstructorsModel } from '../Models/Institute/InstituteCourseRelation.js';
+import { CourseEnrollmentModel } from '../Models/CourseEnrollment/CourseErnrollment.js';
+import { CourseProgressModel } from '../Models/CourseEnrollment/CourseProgress.js';
 
 export const sequelize = new Sequelize(
     'frkmgtsm',//Databse name
@@ -66,7 +68,7 @@ db.VehicleImages = await VehicleImagesModel(sequelize, DataTypes, db.Vehicle)
 db.InstituteCourses = await InstituteCourseModel(sequelize, DataTypes, db.Institute, db.Vehicle, db.Course);
 db.CoursePackages = await CoursePackagesModel(sequelize, DataTypes, db.InstituteCourses)
 db.CourseInstructors = await CourseInstructorsModel(sequelize, DataTypes, db.InstituteCourses, db.Instructor);
- 
+
 db.CourseSyllabus = await CourseSyllabusModel(sequelize, DataTypes, db.InstituteCourses)
 db.ClassSchedule = await ClassScheduleModel(sequelize, DataTypes, db.InstituteCourses)
 
@@ -77,8 +79,9 @@ db.Buying = await BuyingModel(sequelize, DataTypes, db.User, db.Product);
 db.BoughtCourse = await BoughtCourseModel(sequelize, DataTypes, db.CoursePackages, db.Buying);
 db.BoughtBook = await BoughtBookModel(sequelize, DataTypes, db.Book, db.Buying);
 
-
 db.CourseEnrollment = await CourseEnrollmentModel(sequelize, DataTypes, db.CoursePackages, db.User, db.BoughtCourse);
+db.CourseProgress = await CourseProgressModel(sequelize, DataTypes, db.CourseEnrollment, db.ClassSchedule);
+
 db.CountryLicenseType = await CountryLicenseTypeModel(sequelize, DataTypes)
 db.Countries = await CountryModel(sequelize, DataTypes);
 db.Cart = await CartModel(sequelize, DataTypes, db.User, db.Product)

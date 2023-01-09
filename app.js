@@ -37,17 +37,15 @@ const InstituteAdmin = io.of('/institute/admin');
 const InstituteStaff = io.of('/institute/staff');
 const InstituteInstructor = io.of('/institute/instructor');
 
-
 AdminEvents(Admin);
 StudentEvents(io)
-
-
 
 
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true,
 }))
+
 const Port = process.env.PORT || 9000
 
 // SocketFunction(io)
@@ -70,8 +68,6 @@ if (process.env.NODE_ENV === 'production') {
 
     res.sendFile(a);
   });
-} 
+}
 
-server.listen(Port, () => {
-  console.log(`App  is  runnging on port ${Port}`)
-});
+server.listen(Port, () => console.log(`App  is  runnging on port ${Port}`));

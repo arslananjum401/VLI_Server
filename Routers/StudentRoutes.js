@@ -1,6 +1,6 @@
 import express from "express";
 import { BuyProducts, CapturePayPalPayment, CreatePayPalOrder } from "../Controllers/Student Controllers/CheckoutControllers.js";
-import { GetEnrolledCourses, GetUnEnrolledCourses, UnEnrollCourse, GetSingleEnrolledCourse } from "../Controllers/Student Controllers/EnrollCourseControllers.js";
+import { GetEnrolledCourses, GetUnEnrolledCourses, UnEnrollCourse, GetSingleEnrolledCourse, GetCourseProgress } from "../Controllers/Student Controllers/EnrollCourseControllers.js";
 import { ViewCourses } from "../Controllers/Student Controllers/StudentCoursesControllers.js";
 import { AddInterest, ChangeInterest, RateCourse, AddToCart, GetFullCart, RemoveFromCart } from "../Controllers/StudentControllers.js";
 import { PaypalTransaction } from "../Controllers/Transaction.js";
@@ -31,11 +31,14 @@ Srouter
 Srouter
     .get('/enrollCourse', AuthenticatedUser, GetEnrolledCourses)
     .get('/enrollCourse/:EnrollmentId', AuthenticatedUser, GetSingleEnrolledCourse)
-    .post('/Course/rating', AuthenticatedUser, RateCourse)
-    .put('/enrollCourse', AuthenticatedUser, UnEnrollCourse)
-    .get('/unenrollCourse', AuthenticatedUser, GetUnEnrolledCourses);
+    .get('/courseprogress/:EnrollmentId', AuthenticatedUser, GetCourseProgress)
+// .post('/Course/rating', AuthenticatedUser, RateCourse)
+// .put('/enrollCourse', AuthenticatedUser, UnEnrollCourse)
+// .get('/unenrollCourse', AuthenticatedUser, GetUnEnrolledCourses);
 
 Srouter.get('/Course/:ProductId', OptionalAuthenticatedUser, ViewCourses)
+
+
 //Add to cart
 Srouter
     .post('/addtocart/:ProductId', AuthenticatedUser, AddToCart)
@@ -46,6 +49,8 @@ Srouter
 Srouter.post('/buy/course', AuthenticatedUser, BuyCourse)
 Srouter.post('/orders', AuthenticatedUser, CreatePayPalOrder)
 Srouter.post('/orders/:OrderId/capture', AuthenticatedUser, CapturePayPalPayment);
+
+
 
 
 // .post('/paymentIntent/create', AuthenticatedUser, CreateCustomer, CreatePaymentIntent)

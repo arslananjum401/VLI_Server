@@ -89,14 +89,16 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
     let IncludeQuery = {
         include: {
             model: Course,
-            attributes: ["CourseName", "Description", "CourseThumbnail"],
+            attributes: ["CourseName", "Description", "CourseThumbnail"], required: true,
             include: {
+
                 model: InstituteCourses,
                 attributes: ["InstituteCourseId", "ShortDescription"],
+                required: true,
                 include: [
-                    { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"] },
+                    { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"], required: true },
 
-                    { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"] },
+                    { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"], required: true },
                 ]
             }
         },
@@ -113,6 +115,9 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
                 model: SubLicenseTypes,
             }
         })
+        if (!GetLicenseTypes)
+            return res.status(401).json({ message: "Not found" })
+
         if (req.UserId) {
             let Wish = {
                 model: WishList, attributes: ["WishId", "StudentId"],

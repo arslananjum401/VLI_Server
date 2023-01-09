@@ -4,7 +4,7 @@ import { CreateBook, DeleteBook, GetAllBooks, GetSingleBook, UpdateBook } from "
 import { AddCountry, AddCountrysLicenseTypes, DeleteContryFromList, DeleteCountryLicenseType, GetCountriesList, GetSCountryWLicenseTypeList, UpdateCountry } from "../Controllers/AdminControllers/CountryControllers.js";
 import { DeleteCourse, GetAllCourses, GetCourse, NewCourse, UpdateCourse } from "../Controllers/AdminControllers/CoursesControllers.js";
 import { CreateLicenseType, DeleteLicenseType, GetAllLicenseTypeCourses, GetAllLicenseTypes, GetLicenseTypesImage, UpdateLicenseType } from "../Controllers/AdminControllers/LicenseType.js";
-import { CreateVehicleType, DeleteVehicleType, GetAllVehicleTypes, GetVehicleTypesImage, UpdateVehicleType } from "../Controllers/AdminControllers/VehicleType.js";
+import { CreateVehicleType, DeleteVehicleType, GetAllVehicleTypeCourses, GetAllVehicleTypes, GetVehicleTypesImage, UpdateVehicleType } from "../Controllers/AdminControllers/VehicleType.js";
 import { PaypalTransaction } from "../Controllers/Transaction.js";
 import { AuthenticatedUser, AuthenticateUserType } from "../Middlewares/AuthenticateUser.js";
 import { MulterMiddleware } from "../Middlewares/MulterMiddleware.js";
@@ -13,12 +13,7 @@ import { DataParser } from "../Middlewares/ParseData.js";
 const AuthenticateAdminUser = (req, res, next) => {
     AuthenticateUserType(req, res, next, "Admin", "Admin");
 }
-const AuthenticateStaffUser = (req, res, next) => {
-    AuthenticateUserType(req, res, next, "Admin", "Staff");
-}
-const AuthenticateInstructorUser = (req, res, next) => {
-    AuthenticateUserType(req, res, next, "Admin", "Instructor");
-}
+
 
 
 const Aroutes = express.Router();
@@ -76,7 +71,7 @@ const AuthenticateOptional = async (req, res, next) => {
 // Course APIs
 Aroutes
     .post('/course/create', AuthenticatedUser, AuthenticateAdminUser, MulterForCourseThumbnail, DataParser, NewCourse)//done
-    .put('/course/update', AuthenticatedUser, AuthenticateAdminUser, MulterForCourseThumbnail, DataParser, UpdateCourse)//done
+    .put('/course/update', AuthenticatedUser, MulterForCourseThumbnail, DataParser, UpdateCourse)//done
     .delete('/course', AuthenticatedUser, AuthenticateAdminUser, DeleteCourse)//done
     .get('/course/:CoursePK', GetCourse)
     .get('/courses', GetAllCourses);
@@ -133,6 +128,7 @@ Aroutes
     .put('/VehicleType/update', AuthenticatedUser, AuthenticateAdminUser, MulterForVehicleType, DataParser, UpdateVehicleType)
     .delete('/VehicleType/delete', AuthenticatedUser, AuthenticateAdminUser, DeleteVehicleType)
     .get('/AllVehicleTypes', GetAllVehicleTypes)
+    .get('/vehicletype/courses/:VehicleTypeId', AuthenticateOptional, GetAllVehicleTypeCourses)
     .get('/vehicletype/image', GetVehicleTypesImage)//Checked
 
 
