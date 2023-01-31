@@ -54,7 +54,6 @@ export const getVerifyEmailToken = async ({ UserId }, UserEmailValidation) => {
 
         let EmailToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-  
         const a = await UserEmailValidation.create({
             UserFK: UserId,
             EmailToken

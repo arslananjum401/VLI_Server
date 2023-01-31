@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import db from "../../Conn/connection.js";
 import { DeleteFile } from '../../Helpers/DeleteMedia.js';
+import { GetImage } from '../../Helpers/GetImages.js';
 
 const { Vehicle, VehicleImages } = db
 export const AddVehicle = async (req, res) => {
@@ -9,14 +10,15 @@ export const AddVehicle = async (req, res) => {
     for (const key in req.body) {
         if (key.match(regex))
             req.ImagesLink.push(req.body[key])
+
     }
 
     req.body.InstituteFK = req.User.Institute.InstituteId;
 
+    if (req.ImagesLink?.length < 1 || !req.ImagesLink)
+        return res.status(403).json({ message: "Images are required" })
     try {
 
-        if (req.ImagesLink?.length <= 1 || !req.ImagesLink)
-            return res.status(403).json({ message: "Images are required" })
 
         const CheckVehicle = await Vehicle.findOne({
             where: {
@@ -30,21 +32,19 @@ export const AddVehicle = async (req, res) => {
             },
 
         })
- 
-        if (CheckVehicle) {
+
+        if (CheckVehicle)
             return res.status(403).json({ message: "Vehicle already registered" })
-        }
+
         const AddNewVehicle = await Vehicle.create(req.body);
 
         await Promise.all(await req.ImagesLink.map(async (image, index, arr) => {
             try {
-                if (index < arr.length - 1 && index > 0) {
-                    console.log(image)
-                    await VehicleImages.create({
-                        VehicleFK: AddNewVehicle.VehicleId,
-                        VehicleImageLink: image
-                    })
-                }
+                await VehicleImages.create({
+                    VehicleFK: AddNewVehicle.VehicleId,
+                    VehicleImageLink: image
+                })
+
             } catch (error) {
                 console.log(error)
             }
@@ -58,6 +58,7 @@ export const AddVehicle = async (req, res) => {
                 where: { VehicleFK: AddNewVehicle.VehicleId },
             }]
         })
+
         res.status(200).json(GetNewVehicle)
     } catch (error) {
         console.log(`error occured while Adding Vehicle ${error.message}`);
@@ -84,57 +85,80 @@ export const UpdateVehicle = async (req, res) => {
         if (!CheckVehicle)
             return res.status(404).json({ message: "Vehicle not found" })
 
-
-
         const AddNewVehicle = await Vehicle.update(req.body, { where: { VehicleId: req.body.VehicleId } });
 
-
         //To update the Current Images
-        if (req.body.UpdateImages) {
-            await Promise.all(await req.body.UpdateImages.map(async (image, index, arr) => {
-                try {
-                    console.log(image.Vehicle_ImageId)
-                    const FindOldImage = await VehicleImages.findOne({ where: { Vehicle_ImageId: image.Vehicle_ImageId } })// Get to get Old Image
+        let Images = [...req.body.Images]
+        if (req.body.Images.length > 0 && req.body.Images.length < 12) {
 
-                    DeleteFile(VehicleImages, FindOldImage)// To delete Old Image
+            for (let index = 0; index < req.body.Images.length; index++) {
 
-                    if (req.body[image.Pair] && FindOldImage) {
-                        const AddImage = await VehicleImages.create({ VehicleFK: FindOldImage.VehicleFK, VehicleImageLink: req.body[image.Pair] })
-                        // console.log(AddImage)
-                    }
-
-                } catch (error) {
-                    console.log(error)
+                if (req.body.Images[index]?.VehicleImageLink)
+                    continue
+                else if (req.body.Images[index]?.Vehicle_ImageId && !req.body.Images[index].ImagePath) {
+                    const FindOldImage = await VehicleImages.findOne({
+                        where: {
+                            Vehicle_ImageId: req.body.Images[index].Vehicle_ImageId
+                        }
+                    })
+                    const Delete = await VehicleImages.destroy({
+                        where: {
+                            Vehicle_ImageId: req.body.Images[index].Vehicle_ImageId
+                        }
+                    })
                 }
-            }))
+                else if (req.body.Images[index]?.Vehicle_ImageId) {
+
+                    const FindOldImage = await VehicleImages.findOne({
+                        where: {
+                            Vehicle_ImageId: req.body.Images[index].Vehicle_ImageId
+                        }
+                    })// Get to get Old Image
+
+                    // DeleteFile(VehicleImages, FindOldImage)// To delete Old Image
+                    const UpdateImage = await VehicleImages.update({ VehicleImageLink: req.body.Images[index].ImagePath }, {
+                        where: {
+                            Vehicle_ImageId: req.body.Images[index].Vehicle_ImageId
+                        }
+                    })
+                }
+                else if (!req.body.Images[index]?.Vehicle_ImageId) {
+                    await VehicleImages.create({
+                        VehicleFK: req.body.VehicleId,
+                        VehicleImageLink: req.body.Images[index].ImagePath
+                    })
+
+                }
+            }
+
         }
 
 
-        let Length = CheckVehicle.VehicleImages.length + req.body.NewImages.length
+        // let Length = CheckVehicle.VehicleImages.length + req.body.NewImages.length
 
         //To add New Images
-        if (Length < 6 && req.body.NewImages?.length > 0) {
+        // if (Length < 6 && req.body.NewImages?.length > 0) {
 
-            await req.body.NewImages.forEach(async (ImagePath) => {
+        //     await req.body.NewImages.forEach(async (ImagePath) => {
 
-                try {
-                    // if (CheckVehicleImages.VehicleImages.length >= 6) {
-                    //     return res.status(403).json({ message: "No more Images can be added" });
+        //         try {
+        //             // if (CheckVehicleImages.VehicleImages.length >= 6) {
+        //             //     return res.status(403).json({ message: "No more Images can be added" });
 
-                    // }
-                    const AddVehicleImages = await VehicleImages.create({
-                        VehicleImageLink: ImagePath,
-                        VehicleFK: req.body.VehicleId
-                    },
-                    );
+        //             // }
+        //             const AddVehicleImages = await VehicleImages.create({
+        //                 VehicleImageLink: ImagePath,
+        //                 VehicleFK: req.body.VehicleId
+        //             },
+        //             );
 
-                } catch (error) {
-                    console.log(error)
-                }
+        //         } catch (error) {
+        //             console.log(error)
+        //         }
 
-            })
+        //     })
 
-        }
+        // }
 
 
 
@@ -159,9 +183,9 @@ export const RemoveVehicle = async (req, res) => {
             return res.status(401).json({ message: "VehicleId is required" })
 
         const AddNewVehicle = await Vehicle.findOne({ where: { VehicleId: req.body.VehicleId } });
-        if (!AddNewVehicle) {
+        if (!AddNewVehicle)
             return res.status(401).json({ message: "Vehicle not found" })
-        }
+
 
         const DeleteVehicle = await Vehicle.destroy({ where: { VehicleId: req.body.VehicleId } });
         const DeleteVehicleImages = await VehicleImages.destroy({ where: { VehicleFK: req.body.VehicleId } })
@@ -225,3 +249,16 @@ export const GetSingleVehicle = async (req, res) => {
 }
 
 
+export const GetVehicleImage = async (req, res, next) => {
+    try {
+
+        if (req.query.url.search(/VehicleImage/i) > -1 && req.url.search(/VehicleImage/i) > -1)
+            GetImage(req, res)
+        else
+            res.status(200).json({ Message: "Image not found" })
+
+
+    } catch (error) {
+
+    }
+}

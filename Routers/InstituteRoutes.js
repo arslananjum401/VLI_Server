@@ -4,18 +4,15 @@ import { AcceptForwardedCourse, ForwardCourseTostaff, GetAcceptedForwardedCourse
 import { AddCourseToInstitute, GetInstituteCourses, RemoveCourseFromInstitute, UpdateInstituteCourse, GetSingleInstituteCourse } from "../Controllers/Institute Controllers/InstituteCourseControllers.js";
 import { CreateInstructor, UpdateInstructor, GetAllInstructors, DeleteInstructors, GetSingleInstructor, StudentReport, GetCourseReport, GetAvailableInstrutors } from "../Controllers/Institute Controllers/InstructorController.js";
 import { AddStaff, DeleteStaffMemembers, GetAllStaffMemembers, GetSingleStaffMemember } from "../Controllers/Institute Controllers/StaffControllers.js";
-import { AddVehicle, GetAllVehicles, GetSingleVehicle, RemoveVehicle, RemoveVehicleImage, UpdateVehicle } from "../Controllers/Institute Controllers/VehicleControllers.js";
+import { AddVehicle, GetAllVehicles, GetSingleVehicle, RemoveVehicle, RemoveVehicleImage, UpdateVehicle, GetVehicleImage } from "../Controllers/Institute Controllers/VehicleControllers.js";
 const Irouter = express.Router();
 import { AuthenticatedUser, AuthenticateUserType } from "../Middlewares/AuthenticateUser.js";
 import { MulterMiddleware } from "../Middlewares/MulterMiddleware.js";
 import { DataParser } from "../Middlewares/ParseData.js";
 
 
-
-
-
 const AuthenticateInstituteAdminUser = (req, res, next) => {
-    AuthenticateUserType(req, res, next, "Institute", ["Admin"]);
+    AuthenticateUserType(req, res, next, "Institute", ["Admin", "Staff"]);
 }
 const AuthenticateInstituteStaffUser = (req, res, next) => {
     AuthenticateUserType(req, res, next, "Institute", ["Admin", "Staff"]);
@@ -89,8 +86,8 @@ Irouter
     .put("/institute/course/update", AuthenticatedUser, AuthenticateInstituteStaffUser, MulterForCourseCurriculum, DataParser, UpdateInstituteCourse)
     .delete("/institute/course/remove", AuthenticatedUser, AuthenticateInstituteStaffUser, RemoveCourseFromInstitute)
     .get("/institute/courses", AuthenticatedUser, GetInstituteCourses)
-    .get("/institute/course/:InstituteCourseId",   GetSingleInstituteCourse)
-    // .get("/institute/courses", AuthenticatedUser, AuthenticateInstituteAdminUser, GetInstituteCourses)
+    .get("/institute/course/:InstituteCourseId", GetSingleInstituteCourse)
+// .get("/institute/courses", AuthenticatedUser, AuthenticateInstituteAdminUser, GetInstituteCourses)
 
 //  Staff APIs
 Irouter
@@ -108,6 +105,7 @@ Irouter
     .delete('/Vehicle/remove', AuthenticatedUser, AuthenticateInstituteAdminUser, RemoveVehicle)
     .delete('/Vehicle/remove/:ImageId', AuthenticatedUser, AuthenticateInstituteAdminUser, RemoveVehicleImage)
     .get('/Vehicle/:VehicleId', AuthenticatedUser, AuthenticateInstituteAdminUser, GetSingleVehicle)
+    .get('/Vehicleimage/', AuthenticatedUser, AuthenticateInstituteAdminUser, GetVehicleImage)
     .get('/Vehicles', AuthenticatedUser, AuthenticateInstituteAdminUser, GetAllVehicles)
 
 Irouter

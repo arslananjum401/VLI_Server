@@ -7,9 +7,9 @@ export const AuthenticatedUser = async (req, res, next) => {
     try {
         const { token } = await req.cookies;
 
-        if (!token) {
+        if (!token) 
             return res.status(401).json({ message: "Pleases login first" })
-        }
+        
 
 
         const decoded = JWT.verify(token, process.env.SecretKey);
@@ -59,4 +59,12 @@ export const AuthenticateUserType = async (req, res, next, UserType, InstituteUs
     }
     next()
 }
- 
+
+
+export const AuthenticateOptional = async (req, res, next) => {
+    const { token } = await req.cookies;
+    if (token)
+        AuthenticatedUser(req, res, next)
+    else
+        next()
+}

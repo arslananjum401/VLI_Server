@@ -68,10 +68,9 @@ export const Login = async (req, res) => {
 
             CheckPassword = await ComparePassword(req.body.Password, LoginUser.Password);
         }
-        if (!CheckPassword) {
-
+        if (!CheckPassword) 
             return res.status(401).json({ LoginError: "Email or password incorrect" });
-        }
+        
 
         return await SendResponse(req, res, LoginUser, StudentInterest, 200);
     } catch (error) {
@@ -406,7 +405,7 @@ export const NewInstitute = async (req, res) => {
         await InstituteUser.create({ InstituteFK: newInstitute.InstituteId, Institute_UserFK: newInstituteUser.UserId, InstituteUserType: "Admin" })
 
         newInstitute = { ...newInstituteUser.dataValues, Institute: newInstitute };
-        // console.log(newInstitute)
+ 
         delete newInstitute.Password
         return res.status(201).json(newInstitute)
     } catch (errors) {

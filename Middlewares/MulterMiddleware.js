@@ -25,9 +25,6 @@ export const MulterMiddleware = async (req, res, next, MulterVals) => {
             }
         }
 
-
-
-
         const upload = multer({ fileFilter, storage })
         // MulterVals.UploadFields
         const cpUpload = upload.fields(MulterVals.UploadFields);

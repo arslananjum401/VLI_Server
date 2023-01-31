@@ -9,13 +9,13 @@ import { AuthenticatedUser } from "../Middlewares/AuthenticateUser.js";
 import { ConfirmPaymentIntent, CreateCustomer, CreatePaymentIntent } from "../Middlewares/StripePayment.js";
 import { BuyCourse } from "../Controllers/Student Controllers/BuyControllers.js";
 
-const Srouter = express.Router();
+const Srouter = express.Router(); 
 const OptionalAuthenticatedUser = async (req, res, next) => {
     const { token } = await req.cookies;
     if (token) {
         return AuthenticatedUser(req, res, next)
     }
-    next()
+    next() 
 }
 //Interest
 Srouter

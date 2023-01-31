@@ -6,19 +6,19 @@ export const SendResponse = async (req, res, User, StudentInterest, status) => {
     const Token = await GenerateToken(User.UserId);
     const options = {
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-        // sameSite:true,
-        // secure:true
+        // httpOnly: true,
+        // sameSite: true,
+        // secure: true
     }
     User = await CheckInstituteUser(User.dataValues, User.dataValues.UserId);
 
-    const Interest = await CheckStudent(StudentInterest, User);
+    // const Interest = await CheckStudent(StudentInterest, User);
     delete User.Password;
 
     return res
-        .header("Access-Control-Allow-Credentials", true)
+        // .header("Access-Control-Allow-Credentials", true)
         .status(status)
         .cookie("token", Token, options)
-        .cookie("checkToken", Token, { expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000) })
-        .json({ User: User, Interest });
+        // .cookie("checkToken", Token, { expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000) })
+        .json({ User });
 }

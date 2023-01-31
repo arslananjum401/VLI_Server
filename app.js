@@ -15,6 +15,8 @@ import stripe from "stripe";
 import { Server as SocketServer } from "socket.io";
 import { AdminEvents } from "./Events/Admin/Admin.js";
 import { StudentEvents } from "./Events/Student/Student.js";
+import { StaffEvents } from "./Events/Institute/Staff/Staff.js";
+import './Server.js'
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: "./Config/config.env" })
 }
@@ -27,7 +29,7 @@ const app = Express();
 const server = http.createServer(app)
 const CorsOptions = {
   cors: {
-    origin: ["http://localhost:3000"],
+    origin: "http://localhost:3000",
     credentials: true,
   }
 }
@@ -39,35 +41,37 @@ const InstituteInstructor = io.of('/institute/instructor');
 
 AdminEvents(Admin);
 StudentEvents(io)
- 
+StaffEvents(io)
 
-app.use(cors({  
+
+app.use(cors({
   origin: "http://localhost:3000",
-  credentials: true,  
-})) 
+  credentials: true,
+}))
 
 const Port = process.env.PORT || 9000
 
 // SocketFunction(io)
 app.use(cors());
+
 app.use(CookieParser())
 app.use(Express.urlencoded({ limit: "50mb", extended: true }));
-app.use(Express.json({ limit: "50mb" }));
+app.use(Express.json({ limit: "50mb" })); 
 
 app.use('/api', Irouter);
 app.use('/api', Aroutes);
 app.use('/api', Srouter);
 app.use('/api', CRoutes)
-   
+
 
 app.use(Express.static(path.join(__dirname, "./build")))
 Realtions();
-if (process.env.NODE_ENV === 'production') { 
+if (process.env.NODE_ENV === 'production') {
   const a = path.join(__dirname, "./index.html")
-  app.get("*", (req, res) => {
+  app.get("*/", (req, res) => {
 
     res.sendFile(a);
-  }); 
-} 
+  });
+}
 
 server.listen(Port, () => console.log(`App  is  runnging on port ${Port}`)); 

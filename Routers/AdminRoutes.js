@@ -6,67 +6,15 @@ import { DeleteCourse, GetAllCourses, GetCourse, NewCourse, UpdateCourse } from 
 import { CreateLicenseType, DeleteLicenseType, GetAllLicenseTypeCourses, GetAllLicenseTypes, GetLicenseTypesImage, UpdateLicenseType } from "../Controllers/AdminControllers/LicenseType.js";
 import { CreateVehicleType, DeleteVehicleType, GetAllVehicleTypeCourses, GetAllVehicleTypes, GetVehicleTypesImage, UpdateVehicleType } from "../Controllers/AdminControllers/VehicleType.js";
 import { PaypalTransaction } from "../Controllers/Transaction.js";
-import { AuthenticatedUser, AuthenticateUserType } from "../Middlewares/AuthenticateUser.js";
-import { MulterMiddleware } from "../Middlewares/MulterMiddleware.js";
+import { AuthenticatedUser, AuthenticateOptional, AuthenticateUserType } from "../Middlewares/AuthenticateUser.js";
+import { MulterForAdmin, MulterForCourseThumbnail, MulterForLicenseType, MulterForVehicleType } from "../Middlewares/Multer/Admin.js";
 import { DataParser } from "../Middlewares/ParseData.js";
 
 const AuthenticateAdminUser = (req, res, next) => {
     AuthenticateUserType(req, res, next, "Admin", "Admin");
 }
 
-
-
 const Aroutes = express.Router();
-const MulterForAdmin = (req, res, next) => {
-    let MulterVals = {};
-    MulterVals.filepath = './Public/Book/CoverImage'
-    MulterVals.UploadFields = [{ name: 'BookCover' }]
-
-    MulterVals.filetypes = []
-    MulterVals.filetypes[0] = "image/png"
-    MulterVals.filetypes[1] = "image/jpg"
-    MulterVals.filetypes[2] = "image/jpeg"
-    MulterVals.filetypes[3] = "image/svg+xml"
-
-    MulterMiddleware(req, res, next, MulterVals)
-}
-const MulterForCourseThumbnail = (req, res, next) => {
-    let MulterVals = {};
-
-    MulterVals.filepath = './Public/Course/Thumbnail'
-    MulterVals.UploadFields = [{ name: 'CourseThumbnail' }];
-    MulterVals.filetypes = []
-    MulterVals.filetypes[0] = "image/png"
-    MulterVals.filetypes[1] = "image/jpg"
-    MulterVals.filetypes[2] = "image/jpeg"
-    MulterVals.filetypes[3] = "image/svg+xml"
-    MulterMiddleware(req, res, next, MulterVals)
-}
-const MulterForVehicleType = (req, res, next) => {
-    let MulterVals = {};
-
-    MulterVals.filepath = './Public/VehicleType'
-    MulterVals.UploadFields = [{ name: 'VehicleTypeImage' }];
-    MulterVals.filetypes = ["image/png", "image/jpg", "image/jpeg", "image/svg+xml"]
-
-    MulterMiddleware(req, res, next, MulterVals)
-}
-const MulterForLicenseType = (req, res, next) => {
-    let MulterVals = {};
-
-    MulterVals.filepath = './Public/LicenseType'
-    MulterVals.UploadFields = [{ name: 'LicenseTypeImage' }];
-    MulterVals.filetypes = ["image/png", "image/jpg", "image/jpeg", "image/svg+xml"]
-
-    MulterMiddleware(req, res, next, MulterVals)
-}
-const AuthenticateOptional = async (req, res, next) => {
-    const { token } = await req.cookies;
-    if (token)
-        AuthenticatedUser(req, res, next)
-    else
-        next()
-}
 
 // Course APIs
 Aroutes

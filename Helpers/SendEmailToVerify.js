@@ -14,7 +14,7 @@ export const SendEmailToVerify = async (NewUserInfo, UserEmailValidation, req) =
         html: `<h2>Thanks for signing up</h2
             <p> Please click the link to verify your account</p>
             <a href="${Link}">Verify Your Email</a>
-            `
+            ` 
     }
 
     await sendEmail(options);

@@ -11,7 +11,7 @@ export const DeleteFile = async (ImagesModel, OldImageObj, ImagePath, PrimaryKey
     else
       CheckDestruction = true;
 
-      
+
     let FilePath
     if (!ImagePath)
       ImagePath = OldImageObj.VehicleImageLink
