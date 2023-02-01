@@ -87,9 +87,8 @@ export const UpdateVehicle = async (req, res) => {
 
         const AddNewVehicle = await Vehicle.update(req.body, { where: { VehicleId: req.body.VehicleId } });
 
-        //To update the Current Images
-        let Images = [...req.body.Images]
-        if (req.body.Images.length > 0 && req.body.Images.length < 12) {
+
+        if (req.body?.Images?.length > 0 && req.body?.Images?.length < 12) {
 
             for (let index = 0; index < req.body.Images.length; index++) {
 
@@ -134,34 +133,6 @@ export const UpdateVehicle = async (req, res) => {
         }
 
 
-        // let Length = CheckVehicle.VehicleImages.length + req.body.NewImages.length
-
-        //To add New Images
-        // if (Length < 6 && req.body.NewImages?.length > 0) {
-
-        //     await req.body.NewImages.forEach(async (ImagePath) => {
-
-        //         try {
-        //             // if (CheckVehicleImages.VehicleImages.length >= 6) {
-        //             //     return res.status(403).json({ message: "No more Images can be added" });
-
-        //             // }
-        //             const AddVehicleImages = await VehicleImages.create({
-        //                 VehicleImageLink: ImagePath,
-        //                 VehicleFK: req.body.VehicleId
-        //             },
-        //             );
-
-        //         } catch (error) {
-        //             console.log(error)
-        //         }
-
-        //     })
-
-        // }
-
-
-
         // Get Updated Vehicle
         const GetNewVehicle = await Vehicle.findOne({
             where: { VehicleId: req.body.VehicleId },
@@ -170,6 +141,7 @@ export const UpdateVehicle = async (req, res) => {
                 attributes: ["VehicleImageLink", "Vehicle_ImageId"],
             }]
         })
+        console.log(5)
         res.status(200).json(GetNewVehicle)
     } catch (error) {
         console.log(`error occured while Updating Vehicle ${error.message}`);

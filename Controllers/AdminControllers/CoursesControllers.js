@@ -59,7 +59,7 @@ export const UpdateCourse = async (req, res) => {
 
 
         const UpdateCourse = await Course.update(req.body, { where: { CoursePK: req.body.CoursePK } });
-        console.log(UpdateCourse)
+ 
         let CourseGot = await Course.findOne({
             where: { CoursePK: req.body.CoursePK, Status: "Viewable" },
             attributes: { exclude: ["VehicleTypeFK", "LicenseTypeFK", "SubLicenseTypeFK"] },

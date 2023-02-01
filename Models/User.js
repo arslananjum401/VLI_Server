@@ -138,7 +138,7 @@ export const InstituteUsersModel = (sequelize, DataTypes, UserModel, InstituteMo
                 key: "InstituteId" 
             }
         },
-        Institute_UserFK: {
+        UserFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {

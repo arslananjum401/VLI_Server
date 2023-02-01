@@ -30,7 +30,7 @@ export const MulterMiddleware = async (req, res, next, MulterVals) => {
         const cpUpload = upload.fields(MulterVals.UploadFields);
         cpUpload(req,res,(err)=>{
             if (err) {
-                console.log(err)
+                console.log(`Error occurred while saving files via multer: ${err}`);
             }
             else{
                 next()

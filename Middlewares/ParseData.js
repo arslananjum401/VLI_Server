@@ -1,10 +1,10 @@
 const OnlyForUpdateVehicle = (req, key, path) => {
 
     const Exp = /Image\d/i;
- 
+
     req.body.Images.forEach((value, index) => {
         let ImageKey = Object.keys(value).filter((key) => Exp.test(key));
-        if (key === ImageKey[0] && value[ImageKey[0]]==="Changed") {
+        if (key === ImageKey[0] && value[ImageKey[0]] === "Changed") {
             req.body.Images[index] = {
                 ImagePath: req.files[ImageKey[0]][0].path,
                 Vehicle_ImageId: value.Vehicle_ImageId
@@ -16,9 +16,7 @@ const OnlyForUpdateVehicle = (req, key, path) => {
 export const DataParser = (req, res, next) => {
 
     try {
-        // console.log(req.body)
-        // JSON.parse(req.body.VehicleInfo)
-        // console.log(2)
+
         for (const [key, value] of Object.entries(req.body)) {
             try {
 
@@ -34,13 +32,14 @@ export const DataParser = (req, res, next) => {
             const path = value[0].path.replaceAll(`\\`, '/');
             let regex = /Vehicle\/update/ig
             if (req.url.match(regex)) {
-                // console.log(++i)
-                // OnlyForUpdateVehicle(req, key, path)
+
+                OnlyForUpdateVehicle(req, key, path)
+
             } else
                 req.body[key] = path
-
+ 
         }
-   
+
         next()
     } catch (error) {
         console.log("Error Occurred while parsing data: " + error);

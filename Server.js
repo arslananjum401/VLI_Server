@@ -10,10 +10,10 @@ const getWeekByWeekNumber = (weekNumber) => {
     );
 
     console.log(sunday.getDate())
-    const days = [];
+    const days = []; 
     for (let i = 0; i < 7; i++) {
         const currentDay = new Date(sunday);
-        currentDay.setDate(sunday.getDate() + i);
+        currentDay.setDate(sunday.getDate() + i); 
         days.push({
             day: currentDay.toLocaleString('default', { weekday: 'long' }),
             date: currentDay.toLocaleDateString(),

@@ -13,7 +13,7 @@ const { Course, Institute, User: UserModel, StudentInterest, Notification, Book,
 export const CheckInstituteUser = async (CheckInstitute, UserId) => {
     if (CheckInstitute.User === "Institute") {
         const InstituteData = await InstituteUser.findOne({
-            where: { Institute_UserFK: UserId },
+            where: { UserFK: UserId },
             attributes: ["InstituteUserType"],
             include: { model: Institute, attributes: { exclude: ['createdAt'] }, }
         })

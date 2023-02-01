@@ -51,3 +51,4 @@ export function InstituteCourseRelations() {
     ClassSchedule.belongsTo(InstituteCourses, { onDelete: 'CASCADE', foreignKey: "InstituteCourseFK" })
     InstituteCourses.hasMany(ClassSchedule, { onDelete: 'CASCADE', foreignKey: "InstituteCourseFK" })
 }
+ 

@@ -152,35 +152,35 @@ export const CourseModel = async (sequelize, DataTypes, ProductModel, VehicleTyp
 
 
 
-        RunningCourse: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        },
+        // RunningCourse: {
+        //     type: DataTypes.INTEGER,
+        //     defaultValue: 0
+        // },
 
-        Promotion: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        },
+        // Promotion: {
+        //     type: DataTypes.INTEGER,
+        //     defaultValue: 0
+        // },
 
-        Completed: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        },
+        // Completed: {
+        //     type: DataTypes.INTEGER,
+        //     defaultValue: 0
+        // },
 
-        Schedule: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
+        // Schedule: {
+        //     type: DataTypes.STRING,
+        //     allowNull: false
+        // },
 
-        Cancel: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
+        // Cancel: {
+        //     type: DataTypes.BOOLEAN,
+        //     defaultValue: false
+        // },
 
-        OverallRating: {
-            type: DataTypes.FLOAT,
-            defaultValue: 0
-        },
+        // OverallRating: {
+        //     type: DataTypes.FLOAT,
+        //     defaultValue: 0
+        // },
         Status: {
             type: DataTypes.STRING,
             defaultValue: "Viewable"

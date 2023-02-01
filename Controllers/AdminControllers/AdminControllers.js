@@ -29,17 +29,13 @@ export const InstituteRequest = async (req, res) => {
             attributes: { exclude: ["createdAt"] },
             include: {
                 model: InstituteUser,
-                attributes: ["InstituteUserType"],
+                attributes: ["InstituteUserType", "InstituteUserId"],
                 include: { model: User, attributes: { exclude: ["Password", "createdAt"] } }
             }
         })
 
-
-        if (RequestedInstitutes.length === 0) {
+        if (RequestedInstitutes.length === 0)
             return res.status(200).json(RequestedInstitutes);
-        }
-
-        RequestedInstitutes = RequestedInstitutes.map((value) => ModifyInstituteReqObj(value))
 
         return res.status(200).json(RequestedInstitutes);
     } catch (errors) {
@@ -138,7 +134,7 @@ export const UpdateSubLicenseType = async (req, res) => {
         const UpdateLicenseType = await SubLicenseTypes.update(req.body, {
             where: { SubLicenseTypeId: req.body.SubLicenseTypeId }
         })
-        
+
         const GetUpdatedLicenseType = await SubLicenseTypes.findOne({ where: { SubLicenseTypeId: req.body.SubLicenseTypeId } });
 
         res.status(200).json(GetUpdatedLicenseType);

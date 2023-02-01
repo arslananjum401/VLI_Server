@@ -20,7 +20,7 @@ import './Server.js'
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: "./Config/config.env" })
 }
-
+  
 const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 export const Stripe = stripe(process.env.STRIPE_SECRET_KEY)
@@ -61,14 +61,14 @@ app.use(Express.json({ limit: "50mb" }));
 app.use('/api', Irouter);
 app.use('/api', Aroutes);
 app.use('/api', Srouter);
-app.use('/api', CRoutes)
+app.use('/api', CRoutes) 
 
 
 app.use(Express.static(path.join(__dirname, "./build")))
 Realtions();
 if (process.env.NODE_ENV === 'production') {
-  const a = path.join(__dirname, "./index.html")
-  app.get("*/", (req, res) => {
+  const a = path.join(__dirname, "./build/index.html")
+  app.get("*", (req, res) => {
 
     res.sendFile(a);
   });
