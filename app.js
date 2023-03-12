@@ -20,7 +20,7 @@ import { InstituteAdminEvents } from "./Events/Institute/Admin/Admin.js";
 const app = Express();
 import './Server.js';
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:9000"],
   credentials: true,
 }))
 if (process.env.NODE_ENV !== 'production') {
@@ -35,7 +35,7 @@ export const Stripe = stripe(process.env.STRIPE_SECRET_KEY)
 const server = http.createServer(app)
 const CorsOptions = {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:9000"],
     credentials: true,
   }
 }
@@ -54,7 +54,6 @@ StaffEvents(InstituteStaff)
 
 const Port = process.env.PORT || 9000
 
-// SocketFunction(io)
 app.options(cors());
 
 app.use(CookieParser())
@@ -67,14 +66,13 @@ app.use('/api', Srouter);
 app.use('/api', CRoutes)
 Realtions();
 
-
 app.use(Express.static(path.join(__dirname, "./build")))
 if (process.env.NODE_ENV === 'production') {
   const a = path.join(__dirname, "./build/index.html")
   app.get("*", (req, res) => {
 
     res.sendFile(a);
-  }); 
+  });
 }
 
 server.listen(Port, () => console.log(`App  is  runnging on port ${Port}`)); 

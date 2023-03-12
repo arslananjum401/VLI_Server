@@ -1,7 +1,7 @@
 import db from "../../../../Conn/connection.js"
 import { FindUserId } from "../../../Helpers/SaveUser.js"
 
-const { Vehicle, InstituteCourses, User, InstituteUser, Institute,VehicleImages } = db
+const { Vehicle, InstituteCourses, User, InstituteUser, Institute, VehicleImages } = db
 export const GetInsAdminFilteredCourses = async (Props, StafftArr, socket, io) => {
     let where = {}
     // const User = FindUserId(StafftArr, socket.id);
@@ -44,18 +44,18 @@ export const GetInsAdminFilteredCourses = async (Props, StafftArr, socket, io) =
 }
 
 
-export const GetInsFilteredVehicles = async (Props, StafftArr, socket, io) => {
+export const GetInsFilteredVehicles = async (Props, UsersArr, socket, io) => {
     let where = {};
     let order = []
-    const SocketUser = FindUserId(StafftArr, socket.id);
-    console.log(Props)
+    const SocketUser = FindUserId(UsersArr, socket.id);
+
 
     try {
         const GetInstitute = await User.findOne({
             where: {
                 UserId: SocketUser.UserId,
 
-            },
+            }, 
             include: {
                 model: InstituteUser,
                 include: {
@@ -84,14 +84,14 @@ export const GetInsFilteredVehicles = async (Props, StafftArr, socket, io) => {
 
 
         const GetAllVehicles = await Vehicle.findAll({
-            where: { InstituteFK: GetInstitute?.InstituteUser?.Institute?.InstituteId,  },
+            where: { InstituteFK: GetInstitute?.InstituteUser?.Institute?.InstituteId, },
             include: [{
                 model: VehicleImages,
                 attributes: ["VehicleImageLink", "Vehicle_ImageId"],
             }],
             order: [...order]
         })
- 
+        console.log(GetAllVehicles)
         // // await io.to(User.SocketId).emit("ReceiveSortedCourse", AllCatgories)
         await socket.emit("FilteredInsVehicles", GetAllVehicles);
     }
