@@ -2,7 +2,7 @@
 import db from '../../Conn/connection.js'
 import { CheckCompletion, CheckRunningMark } from '../../Helpers/Helpers.js';
 
-const { CourseEnrollment, Course, CoursePackages, InstituteCourses, CourseProgress, ClassSchedule } = db;
+const { CourseEnrollment, Course, CoursePackages, InstituteCourses, CourseProgress, ClassSchedule, User, TimeTable } = db;
 
 
 export const GetEnrolledCourses = async (req, res) => {
@@ -20,7 +20,8 @@ export const GetEnrolledCourses = async (req, res) => {
                         include: { model: Course, attributes: ["CoursePK", "CourseName", "Description", "CourseThumbnail"] }
                     }
                 }
-            ]
+            ],
+            order:[["createdAt","DESC"]]
         })
 
 
@@ -35,12 +36,20 @@ export const GetEnrolledCourses = async (req, res) => {
 
 export const GetSingleEnrolledCourse = async (req, res) => {
     try {
+        let where
+        if (req.User.User === "Student")
+            where = { where: { UserFK: req.UserId, EnrollmentId: req.params.EnrollmentId } }
+        else if (req.User.User === "Institute")
+            where = { where: { EnrollmentId: req.params.EnrollmentId } }
+
+
+
 
         const SEnrolledCourse = await CourseEnrollment.findOne({
+            ...where,
 
-            where: { UserFK: req.UserId, EnrollmentId: req.params.EnrollmentId },
             attributes: ["EnrollmentId"],
-            include: {
+            include: [{
                 model: CoursePackages, attributes: ["CoursePackageId", "DrivingHours", "InClassHours", "OnlineHours"],
                 include: {
                     model: InstituteCourses, attributes: ["InstituteCourseId", "ShortDescription", "LongDescription", "Possible_FAQs"],
@@ -51,7 +60,11 @@ export const GetSingleEnrolledCourse = async (req, res) => {
                         { model: ClassSchedule, attributes: { exclude: ["createdAt", "InstituteCourseFK"] } },
                     ]
                 }
+            },
+            {
+                model: User
             }
+            ]
 
 
         })
@@ -71,10 +84,16 @@ export const GetSingleEnrolledCourse = async (req, res) => {
 
 export const GetCourseProgress = async (req, res) => {
     try {
+        let where
+        if (req.User.User === "Student")
+            where = { where: { UserFK: req.UserId, EnrollmentId: req.params.EnrollmentId } }
+        else if (req.User.User === "Institute")
+            where = { where: { EnrollmentId: req.params.EnrollmentId } }
+
         const SEnrolledCourse = await CourseEnrollment.findOne({
-            where: { UserFK: req.UserId, EnrollmentId: req.params.EnrollmentId },
+            ...where,
             attributes: ["EnrollmentId"],
-            include: {
+            include: [{
                 model: CoursePackages, attributes: ["CoursePackageId", "DrivingHours", "InClassHours", "OnlineHours"],
                 include: {
                     model: InstituteCourses, attributes: ["InstituteCourseId", "ShortDescription", "LongDescription", "Possible_FAQs"],
@@ -85,7 +104,9 @@ export const GetCourseProgress = async (req, res) => {
                         { model: ClassSchedule, attributes: { exclude: ["createdAt", "InstituteCourseFK"] } },
                     ]
                 }
-            }
+            },
+
+            ]
 
 
         })
@@ -97,13 +118,34 @@ export const GetCourseProgress = async (req, res) => {
         const CourseProgressObj = await CourseProgress.findAll({ where: { EnrollmentFK: req.params.EnrollmentId } })
 
         res.status(200).json({ CourseProgress: CourseProgressObj, EnrolledCourse: SEnrolledCourse });
-        
+
     } catch (error) {
         console.log(`error occurred while Getting Course Progress: ${error}`);
         return res.status(500).json(error);
     }
 }
 
+export const GetTimeTable = async (req, res) => {
+
+    try {
+        let GetTimeTable = await TimeTable.findAll(req.body, {
+            where: {
+                EnrollmentId: req.params.EnrollmentId
+            }
+        })
+        GetTimeTable = GetTimeTable.map(value => {
+            value = value.dataValues;
+            if (value?.ClassType)
+
+
+                return { ...value, editable: false, deletable: false, draggable: false, disabled: false }
+        })
+        res.status(200).json(GetTimeTable)
+    } catch (error) {
+        console.log(`error occurred while UnEnrolling courses: ${error}`);
+        return res.status(500).json(error);
+    }
+}
 export const UnEnrollCourse = async (req, res) => {
     req.body.EnrollmentStatus = false;
     req.body.EnrollmentPeriod = Date.now();

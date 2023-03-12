@@ -1,6 +1,6 @@
 import db from '../connection.js';
 
-const { Course, User, LicenseTypes, Countries, VehicleTypes, CourseEnrollment, SubLicenseTypes, BoughtCourse, Institute, CoursePackages, InstituteCourses, Vehicle, CourseSyllabus, ClassSchedule } = db;
+const { Course, User, LicenseTypes, Countries, VehicleTypes, CourseEnrollment, SubLicenseTypes, BoughtCourse, Institute, CoursePackages, InstituteCourses, Vehicle, CourseSyllabus, ClassSchedule, CourseProgress, TimeTable, Instructor, IE_Relation } = db;
 export function CourseRelations() {
 
     Course.belongsTo(LicenseTypes, { foreignKey: 'LicenseTypeFK' });
@@ -12,8 +12,8 @@ export function CourseRelations() {
     Course.belongsTo(VehicleTypes, { foreignKey: 'VehicleTypeFK' });
     VehicleTypes.hasMany(Course, { foreignKey: 'VehicleTypeFK' });
 
-    Countries.belongsToMany(LicenseTypes, { through: "CountryLicenseType", foreignKey: "CL_CountryId" });
-    LicenseTypes.belongsToMany(Countries, { through: "CountryLicenseType", foreignKey: "CL_LicenseTypeId" });
+    // Countries.belongsToMany(LicenseTypes, { through: "CountryLicenseType", foreignKey: "CL_CountryId" });
+    // LicenseTypes.belongsToMany(Countries, { through: "CountryLicenseType", foreignKey: "CL_LicenseTypeId" });
 
 }
 
@@ -27,6 +27,22 @@ export function CourseEnrollmentRelations() {
 
     CourseEnrollment.belongsTo(User, { foreignKey: "UserFK" });
     User.hasOne(CourseEnrollment, { foreignKey: "UserFK" });
+
+
+
+    CourseEnrollment.belongsTo(CourseProgress, { foreignKey: "EnrollmentFK" });
+    CourseProgress.hasOne(CourseEnrollment, { foreignKey: "EnrollmentFK" });
+
+
+ 
+    CourseEnrollment.belongsToMany(Instructor, { through: IE_Relation, foreignKey: "EnrollmentFK" });
+    Instructor.belongsToMany(CourseEnrollment, { through: IE_Relation, foreignKey: "InstructorFK" });
+
+
+
+    TimeTable.belongsTo(CourseEnrollment, { foreignKey: "EnrollmentFK" });
+    CourseEnrollment.hasOne(TimeTable, { foreignKey: "EnrollmentFK" });
+
 }
 
 export function InstituteCourseRelations() {
@@ -49,6 +65,6 @@ export function InstituteCourseRelations() {
 
 
     ClassSchedule.belongsTo(InstituteCourses, { onDelete: 'CASCADE', foreignKey: "InstituteCourseFK" })
-    InstituteCourses.hasMany(ClassSchedule, { onDelete: 'CASCADE', foreignKey: "InstituteCourseFK" })
+    InstituteCourses.hasMany(ClassSchedule, { onDelete: 'CASCADE', foreignKey: "InstituteCourseFK" });
+
 }
- 

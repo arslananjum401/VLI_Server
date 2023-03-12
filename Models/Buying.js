@@ -7,7 +7,7 @@ export const BuyingModel = async (sequelize, Datatypes, UserModel) => {
             primaryKey: true
         },
 
-        BuyerId: {
+        UserFK: {
             type: Datatypes.UUID,
             allowNull: false,
             references: {
@@ -48,8 +48,9 @@ export const BoughtCourseModel = async (sequelize, Datatypes, CoursePackagesMode
                 key: "BuyingId"
             }
         },
-        RemainingPrice: {
-            type: Datatypes.FLOAT,
+       
+        InstallmentsPaid: {
+            type: Datatypes.INTEGER,
             allowNull: false,
             defaultValue: 0
         },

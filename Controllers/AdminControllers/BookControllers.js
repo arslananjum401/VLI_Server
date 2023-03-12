@@ -1,5 +1,6 @@
 import db from '../../Conn/connection.js';
 import { CheckUUID } from '../../Helpers/CheckUUID.js';
+import { GetImage } from '../../Helpers/GetImages.js';
 
 
 
@@ -7,26 +8,20 @@ const { Book, Product, BookReputationInfo } = db;
 
 export const CreateBook = async (req, res) => {
     try {
-        req.body.ProductType = "Book"
-        const FindBook = await Product.findOne({ where: { ProductName: req.body.BookTitle } });
-        if (FindBook) {
+
+        const FindBook = await Book.findOne({ where: { BookTitle: req.body.BookTitle } });
+
+        if (FindBook)
             return res.status(401).json({ message: "Book with same Name already exists" })
-        }
 
-
-        req.body.ProductName = req.body.BookTitle;
-        const NewProduct = await Product.create(req.body);
-        req.body.ProductFK = NewProduct.ProductId;
+        req.body.PossibleKeywords = JSON.stringify(req.body.PossibleKeywords)
         req.body.CreatedBy = req.UserId
+
+
         const NewBook = await Book.create(req.body);
+        NewBook.PossibleKeywords = JSON.parse(NewBook.PossibleKeywords)
 
-        const FindNewBook = await Product.findOne({
-            where: { ProductId: NewProduct.ProductId },
-            include: [{ model: Book, include: { model: BookReputationInfo } }]
-
-        });
-
-        res.status(201).json(FindNewBook);
+        res.status(201).json(NewBook);
     } catch (error) {
         console.log(`Error occurred while creating Book ${error.message}`);
         res.status(500).json(error);
@@ -35,10 +30,7 @@ export const CreateBook = async (req, res) => {
 
 export const GetAllBooks = async (req, res) => {
     try {
-        const FindNewBook = await Product.findAll({
-            where: { ProductType: "Book" },
-            include: [{ model: Book, include: { model: BookReputationInfo } }]
-        });
+        const FindNewBook = await Book.findAll();
         res.status(200).json(FindNewBook);
     } catch (error) {
         console.log(`Error occurred while Getting All Book ${error.message}`);
@@ -107,5 +99,21 @@ export const UpdateBook = async (req, res) => {
     } catch (error) {
         console.log(`Error occurred while Deleting Book ${error}`);
         res.status(500).json(error);
+    }
+}
+
+
+
+export const GetBookImage = async (req, res, next) => {
+    try {
+
+        if (req.query.url.search(/CoverImage/i) > -1 && req.url.search(/Book\/Image/i))
+            GetImage(req, res)
+        else
+            res.status(200).json({ Message: "Image not found" })
+
+
+    } catch (error) {
+
     }
 }

@@ -11,7 +11,7 @@ export const SocketFunction = (io) => {
 
         socket.on('SaveUser', async ({ UserId, UserType }) => { 
             socket.join(UserId)
-            if (UserType === "Admin") {
+            if (UserType === "Admin") { 
                 AdminUserIds = UserId
 
             } else if (UserType === "Institute") {

@@ -8,18 +8,25 @@ import { ArrangeCourseObject, ModifyCartObject } from '../../Helpers/ChangeObjec
 import { Paginate } from '../../Helpers/Paginate.js';
 
 
-const { Course, Institute, User: UserModel, StudentInterest, Notification, Book, Product, LicenseTypes, Cart, SubLicenseTypes, VehicleTypes, UserResetPassword, InstituteUser, InstituteCourses } = db;
+const { Course, Institute, User: UserModel, StudentInterest, Notification, Book, Product, LicenseTypes, Cart, SubLicenseTypes, VehicleTypes, UserResetPassword, InstituteUser, InstituteCourses, Instructor } = db;
 
 export const CheckInstituteUser = async (CheckInstitute, UserId) => {
     if (CheckInstitute.User === "Institute") {
         const InstituteData = await InstituteUser.findOne({
             where: { UserFK: UserId },
             attributes: ["InstituteUserType"],
-            include: { model: Institute, attributes: { exclude: ['createdAt'] }, }
+            include: [{ model: Institute, attributes: { exclude: ['createdAt'] } },]
         })
 
-        if (!InstituteData) {
+        if (!InstituteData)
             return false;
+
+
+        if (InstituteData?.InstituteUserType === "Instructor") {
+            const GetInstructor = await Instructor.findOne({
+                where: { UserFK: UserId },
+            })
+            return CheckInstitute = { ...CheckInstitute, InstituteUserType: InstituteData.dataValues.InstituteUserType, Institute: InstituteData.dataValues.Institute, Instructor: GetInstructor.dataValues }
         }
         CheckInstitute = { ...CheckInstitute, InstituteUserType: InstituteData.dataValues.InstituteUserType, Institute: InstituteData.dataValues.Institute }
 

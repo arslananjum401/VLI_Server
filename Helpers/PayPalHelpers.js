@@ -34,9 +34,10 @@ export async function CapturePaymentFun(orderId, generateAccessToken) {
             }
         });
         const data = await response.json();
-        return data;
+        return { data };
     } catch (error) {
         console.log(`Error occurred while Capturing payment fun ${error}`)
+        return { error }
     }
 
 }

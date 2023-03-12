@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="102.502" height="82.001" viewBox="0 0 102.502 82.001">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Icon_awesome-chalkboard-teacher" data-name="Icon awesome-chalkboard-teacher" d="M33.313,56.376a3.664,3.664,0,0,0-1.131.175,21.127,21.127,0,0,1-6.557,1.107,21.145,21.145,0,0,1-6.558-1.107,3.654,3.654,0,0,0-1.129-.175A17.939,17.939,0,0,0,0,74.413,7.668,7.668,0,0,0,7.688,82H43.563a7.668,7.668,0,0,0,7.688-7.588A17.939,17.939,0,0,0,33.313,56.376Zm-7.688-5.125A15.375,15.375,0,1,0,10.25,35.876,15.375,15.375,0,0,0,25.626,51.251ZM94.814,0h-61.5a7.827,7.827,0,0,0-7.688,7.942v7.433a20.268,20.268,0,0,1,10.25,2.851V10.25H92.251V56.376H82V46.126H61.5v10.25H49.291a20.412,20.412,0,0,1,6.357,10.25H94.814a7.827,7.827,0,0,0,7.688-7.942V7.942A7.827,7.827,0,0,0,94.814,0Z" transform="translate(15747.499 8363)"/>
+    </clipPath>
+    <linearGradient id="linear-gradient" x1="-0.129" y1="-0.164" x2="1.511" y2="1.18" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#a9f7ac"/>
+      <stop offset="1" stop-color="#f2c152"/>
+    </linearGradient>
+  </defs>
+  <g id="Mask_Group_189" data-name="Mask Group 189" transform="translate(-15747.499 -8363)" clip-path="url(#clip-path)">
+    <path id="BG" d="M30,0H147.662a4,4,0,0,1,4,4V110.076a30,30,0,0,1-30,30H4a4,4,0,0,1-4-4V30A30,30,0,0,1,30,0Z" transform="translate(15727.353 8339.093)" fill="url(#linear-gradient)"/>
+  </g>
+</svg>

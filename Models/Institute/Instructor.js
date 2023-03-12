@@ -73,11 +73,30 @@ export const InstructorModel = async (sequelize, DataTypes, InstituteMId, Licens
             type: DataTypes.STRING,
             allowNull: false
         },
-        TrainingArea: {
+
+
+
+        ProfileImage: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        LicenseImage: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        TrainerPermitImage: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        SpecialLicenseImage: {
             type: DataTypes.STRING,
             allowNull: false
         },
 
+        Status: {
+            type: DataTypes.STRING,
+            defaultValue: "Available"
+        },
         Suspend: {
             type: DataTypes.BOOLEAN,
             defaultValue: false

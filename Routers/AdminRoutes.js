@@ -1,17 +1,18 @@
 import express from "express";
 import { InstituteRequest, InstituteReqRes, AcceptedRequests, RejectedRequests, DownloadDocument, getAllInstitutes, getInstitute, CreateSubLicenseType, UpdateSubLicenseType, DeleteSubLicenseType, GetParentLicenseType, } from '../Controllers/AdminControllers/AdminControllers.js';
-import { CreateBook, DeleteBook, GetAllBooks, GetSingleBook, UpdateBook } from "../Controllers/AdminControllers/BookControllers.js";
+import { CreateBook, DeleteBook, GetAllBooks, GetBookImage, GetSingleBook, UpdateBook } from "../Controllers/AdminControllers/BookControllers.js";
 import { AddCountry, AddCountrysLicenseTypes, DeleteContryFromList, DeleteCountryLicenseType, GetCountriesList, GetSCountryWLicenseTypeList, UpdateCountry } from "../Controllers/AdminControllers/CountryControllers.js";
 import { DeleteCourse, GetAllCourses, GetCourse, NewCourse, UpdateCourse } from "../Controllers/AdminControllers/CoursesControllers.js";
 import { CreateLicenseType, DeleteLicenseType, GetAllLicenseTypeCourses, GetAllLicenseTypes, GetLicenseTypesImage, UpdateLicenseType } from "../Controllers/AdminControllers/LicenseType.js";
 import { CreateVehicleType, DeleteVehicleType, GetAllVehicleTypeCourses, GetAllVehicleTypes, GetVehicleTypesImage, UpdateVehicleType } from "../Controllers/AdminControllers/VehicleType.js";
 import { PaypalTransaction } from "../Controllers/Transaction.js";
-import { AuthenticatedUser, AuthenticateOptional, AuthenticateUserType } from "../Middlewares/AuthenticateUser.js";
-import { MulterForAdmin, MulterForCourseThumbnail, MulterForLicenseType, MulterForVehicleType } from "../Middlewares/Multer/Admin.js";
+import { AuthenticatedUser, AuthenticateOptional, AuthenticateUserType } from "../Middlewares/Authentication/AuthenticateUser.js";
+import { AuthenticateInstituteStaffUser } from "../Middlewares/Authentication/Institute.js";
+import { MulterForBookCover, MulterForCourseThumbnail, MulterForLicenseType, MulterForVehicleType } from "../Middlewares/Multer/Admin.js";
 import { DataParser } from "../Middlewares/ParseData.js";
 
 const AuthenticateAdminUser = (req, res, next) => {
-    AuthenticateUserType(req, res, next, "Admin", "Admin");
+    AuthenticateUserType(req, res, next, "Admin");
 }
 
 const Aroutes = express.Router();
@@ -22,7 +23,9 @@ Aroutes
     .put('/course/update', AuthenticatedUser, MulterForCourseThumbnail, DataParser, UpdateCourse)//done
     .delete('/course', AuthenticatedUser, AuthenticateAdminUser, DeleteCourse)//done
     .get('/course/:CoursePK', GetCourse)
-    .get('/courses', GetAllCourses);
+    .get('/courses', 
+    // AuthenticatedUser, AuthenticateInstituteStaffUser,
+     GetAllCourses);
 
 
 //  Countries APIs
@@ -31,7 +34,7 @@ Aroutes
     .put('/country/update', AuthenticatedUser, AuthenticateAdminUser, UpdateCountry)
     .delete('/country/delete', AuthenticatedUser, AuthenticateAdminUser, DeleteContryFromList)
     .get('/countries', AuthenticatedUser, AuthenticateAdminUser, GetCountriesList)
- 
+
 
 Aroutes
     .post('/country/licenseType/add', AuthenticatedUser, AuthenticateAdminUser, AddCountrysLicenseTypes)
@@ -82,38 +85,13 @@ Aroutes
 
 // Book APIs
 Aroutes
-    .post('/Book/Create', AuthenticatedUser, AuthenticateAdminUser, MulterForAdmin, DataParser, CreateBook)//Checked
+    .post('/Book/Create', AuthenticatedUser, AuthenticateAdminUser, MulterForBookCover, DataParser, CreateBook)//Checked
     .put('/Book/update/:ProductId', AuthenticatedUser, AuthenticateAdminUser, UpdateBook)//Checked
     .delete('/Book/delete/:ProductId', AuthenticatedUser, AuthenticateAdminUser, DeleteBook)//Checked
-    .get('/Books', AuthenticatedUser, AuthenticateAdminUser, GetAllBooks)//Checked
+    .get('/Books', AuthenticateOptional, GetAllBooks)//Checked
     .get('/Book/:ProductId', AuthenticatedUser, AuthenticateAdminUser, GetSingleBook)//Checked
+    .get('/Books/Image', GetBookImage)//Checked
 
 Aroutes.get('/paypal', AuthenticatedUser, AuthenticateAdminUser, PaypalTransaction)
 
 export default Aroutes;
-
-
-
-
-// req.query.url = req.query.url.replaceAll('"', '')
-
-// const FilePath = path.join(__dirname, `../../${req.query.url}`)
-// console.log(FilePath)
-// const stream = fs.createReadStream(FilePath);
-// // res.set({ 'Content-Type': 'image/png' });
-
-
-
-// // fs.access(FilePath, function (exist) {
-// //     console.log(exist)
-// //     if(!exist) {
-// //       // if the file is not found, return 404
-// //       res.statusCode = 404;
-// //     //   res.end(`File ${pathname} not found!`);
-// //       return;
-// //     }
-
-// //   });
-// // console.log(path.join(__dirname, `../../${req.query.url}`))
-// res.set({ 'Content-Type': 'image/png' });
-// res.status(200).sendFile(FilePath);

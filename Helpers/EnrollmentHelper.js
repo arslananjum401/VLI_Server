@@ -2,26 +2,23 @@ import db from "../Conn/connection.js"
 
 const { CourseEnrollment } = db
 
-export const EnrollInCourse = async (req, res, { BoughtCourse }) => {
+export const EnrollInCourse = async (req, res, BoughtCourse) => {
     try {
-        // req.body.CoursePackageFK = CoursePackageFK;
-        // req.body.BoughtCourseFK = BoughtCourse;
-        // req.body.UserFk = req.UserId;
+
         let Success = false;
-        for (let i = 0; i < BoughtCourse.length; i++) {
 
-            const EnrollCourse = await CourseEnrollment.create({
-                CoursePackageFK: BoughtCourse[i].CoursePackageId,
-                BoughtCourseFK: BoughtCourse[i].BoughtCourseFK,
-                UserFK: req.UserId
-            });
-            if (EnrollCourse) {
-                Success = true;
-            }
 
-        } 
+        const EnrolledCourse = await CourseEnrollment.create({
+            CoursePackageFK: BoughtCourse.CoursePackageFK,
+            BoughtCourseFK: BoughtCourse.BoughtCourseFK,
+            UserFK: req.UserId,
+            InstallmentsPaid: req.body.Installments
+        });
+        if (EnrolledCourse)
+            Success = true
 
-        return Success
+
+        return {Success,  EnrolledCourse}
     } catch (error) {
         console.log(error)
         res.status(500).json({ error })

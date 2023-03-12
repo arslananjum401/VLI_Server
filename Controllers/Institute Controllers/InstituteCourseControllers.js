@@ -4,17 +4,27 @@ import { CheckUUID } from "../../Helpers/CheckUUID.js";
 import { ParseFAQs, StringifyFQAs } from "../../Helpers/DataParsersAndStringify.js";
 import { DeleteFile } from "../../Helpers/DeleteMedia.js";
 
-const { InstituteCourses, Institute, CourseSyllabus, Course, ClassSchedule, CoursePackages, Instructor, Vehicle, User, CourseInstructors } = db;
+const { InstituteCourses, Institute, CourseSyllabus, Course, ClassSchedule, CoursePackages, Instructor, Vehicle, User, CourseInstructors, CourseEnrollment, TimeTable, IE_Relation, LicenseTypes, VehicleTypes, StudentInfo } = db;
 const Query = [
     {
         model: Instructor,
-        where: { Suspend: false },
+        // where: { Suspend: false },
         attributes: ["InstructorId", "PhoneNumber", "LicenseNumber"],
         include: { model: User, attributes: ["FirstName", "LastName"] }
     },
-    { model: Vehicle, attributes: ["VehicleId", "ManufacturingCompany", "Model", "Year", "PlateNumber"] },
-    { model: CoursePackages, attributes: ["CoursePackageId", "DrivingHours", "InClassHours", "OnlineHours", "TotalFee"] },
-    { model: Course, attributes: ["CoursePK", "Description", "RunningCourse", "Promotion", "CourseName"] },
+    { model: Vehicle, attributes: ["VehicleId", "Manufacturer", "Model", "Year", "PlateNumber"] },
+    { model: CoursePackages, attributes: ["CoursePackageId", "DrivingHours", "InClassHours", "OnlineHours", "TotalFee", "Installments"] },
+    {
+        model: Course, attributes: ["CoursePK", "Description", "CourseName"],
+        include: [
+            {
+                model: LicenseTypes, attributes: ["LicenseTypeName", "LicenseTypeId"]
+            },
+            {
+                model: VehicleTypes, attributes: ["VehicleTypeName", "VehicleTypeId"]
+            }
+        ]
+    },
     { model: Institute, attributes: ["InstituteName"] },
     { model: CourseSyllabus, attributes: { exclude: ["InstituteCourseFK"] } },
     { model: ClassSchedule, attributes: { exclude: ["InstituteCourseFK"] } },
@@ -29,7 +39,6 @@ export const AddCourseToInstitute = async (req, res) => {
         return res.status(200).json({ message: "Invalid UUID" })
 
     try {
-
         const CheckInstituteCourse = await InstituteCourses.findOne({
             where: {
                 InstituteFK: req.User.Institute.InstituteId,
@@ -37,11 +46,8 @@ export const AddCourseToInstitute = async (req, res) => {
             },
         })
 
-        if (CheckInstituteCourse) {
+        if (CheckInstituteCourse)
             return res.status(401).json({ message: "Course already addedd" });
-        }
-
-
 
         const GetCourse = await Course.findOne({ where: { CoursePK: req.body.CourseFK } })
 
@@ -51,23 +57,23 @@ export const AddCourseToInstitute = async (req, res) => {
         StringifyFQAs(req)
         const InstituteCourseCreated = await InstituteCourses.create(req.body)
 
-        req.body.Packages = req.body.Packages.map((value) =>
+        req.body.Packages = req.body.Packages.map(value =>
             value = { ...value, InstituteCourseFK: InstituteCourseCreated.InstituteCourseId })
         await CoursePackages.bulkCreate(req.body.Packages);
 
 
-        req.body.Instructors = req.body.Instructors.map((value) =>
-            value = { InstructorFK: value, InstituteCourseFK: InstituteCourseCreated.InstituteCourseId })
+        req.body.Instructors = req.body.Instructors.map(value =>
+            value = { ...value, InstituteCourseFK: InstituteCourseCreated.InstituteCourseId })
         await CourseInstructors.bulkCreate(req.body.Instructors);
 
 
-        req.body.CourseSyllabus = req.body.CourseSyllabus.map((value) =>
+        req.body.CourseSyllabus = req.body.CourseSyllabus.map(value =>
             value = { ...value, InstituteCourseFK: InstituteCourseCreated.InstituteCourseId })
 
         await CourseSyllabus.bulkCreate(req.body.CourseSyllabus);
 
 
-        req.body.ClassSchedule = req.body.ClassSchedule.map((value) =>
+        req.body.ClassSchedule = req.body.ClassSchedule.map(value =>
             value = { ...value, InstituteCourseFK: InstituteCourseCreated.InstituteCourseId })
         await ClassSchedule.bulkCreate(req.body.ClassSchedule);
 
@@ -75,17 +81,15 @@ export const AddCourseToInstitute = async (req, res) => {
         const InstituteCourse = await InstituteCourses.findOne({
             where: { InstituteCourseId: InstituteCourseCreated.InstituteCourseId },
             include: Query
-
         })
 
         ParseFAQs(InstituteCourse)
         res.status(200).json(InstituteCourse)
     } catch (error) {
-        console.log(`error occurred while adding course to Institute: ${error.message}`);
+        console.log(`error occurred while adding course to Institute: ${error}`);
         return res.status(500).json({ error });
     }
 }
-
 
 export const UpdateInstituteCourse = async (req, res) => {
     req.body.Publish = false
@@ -145,9 +149,29 @@ export const GetInstituteCourses = async (req, res) => {
         return res.status(500).json({ error });
     }
 }
+export const ApproveRejectInstituteCourses = async (req, res) => {
+    try {
+        const ApproveInstituteCourse = await InstituteCourses.update(req.body, {
+            where: { InstituteCourseId: req.body.InstituteCourseId }
+        })
+        const InstituteCourse = await InstituteCourses.findAll({
+            where: { InstituteFK: req.User.Institute.InstituteId },
+            attributes: { exclude: ["VehicleFK", "InstituteFK", "InstructorFK", "createdAt"] },
+            include: Query
+
+        })
+
+        ParseFAQs(InstituteCourse)
+        res.status(200).json(InstituteCourse)
+    } catch (error) {
+        console.log(`error occurred while removing course from Institute: ${error.message}`);
+        return res.status(500).json({ error });
+    }
+}
 
 export const RemoveCourseFromInstitute = async (req, res) => {
     try {
+
         const GetInstituteCourse = await InstituteCourses.findOne({
             where: { InstituteCourseId: req.body.InstituteCourseId },
             include: Query
@@ -163,8 +187,13 @@ export const RemoveCourseFromInstitute = async (req, res) => {
         const DeleteInstituteCourse = await InstituteCourses.destroy({
             where: { InstituteCourseId: GetInstituteCourse.InstituteCourseId }
         });
+        const InstituteCourses = await InstituteCourses.findAll({
+            where: { InstituteFK: req.User.Institute.InstituteId },
+            attributes: { exclude: ["VehicleFK", "InstituteFK", "InstructorFK", "createdAt"] },
+            include: Query
 
-        res.status(200).json({ message: "Course Deleted Successfully", Success: true })
+        })
+        res.status(200).json({ message: "Course Deleted Successfully", InstituteCourses })
     } catch (error) {
         console.log(`error occurred while removing course from Institute: ${error.message}`);
         return res.status(500).json({ error });
@@ -176,14 +205,69 @@ export const RemoveCourseFromInstitute = async (req, res) => {
 export const GetSingleInstituteCourse = async (req, res) => {
     try {
 
+
+        Query[2].include = { model: CourseEnrollment }
+
         const InstituteCourse = await InstituteCourses.findOne({
             where: { InstituteCourseId: req.params.InstituteCourseId },
             attributes: { exclude: ["VehicleFK", "InstituteFK", "InstructorFK", "createdAt"] },
             include: Query
         })
-
-
+        InstituteCourse?.CoursePackages?.forEach((value, index) => {
+            if (value?.dataValues.CourseEnrollment)
+                InstituteCourse.dataValues.Enrolled = true
+        })
         res.status(200).json(InstituteCourse)
+    } catch (error) {
+        console.log(`error occurred while Getting single institute course: ${error.message}`);
+        return res.status(500).json({ error });
+    }
+}
+
+export const GetClassSchedule = async (req, res) => {
+    try {
+
+        const GetCoursePackages = await CourseEnrollment.findOne({
+            where: { EnrollmentId: req.params.EnrollmentId },
+            include: {
+                model: CoursePackages,
+                include: {
+                    model: InstituteCourses,
+                    include: {
+                        model: ClassSchedule
+                    }
+                }
+            }
+        });
+
+        const GetStudentInfo = await CourseEnrollment.findOne({
+            include: [
+                {
+                    model: User,
+                    include: {
+                        model: StudentInfo
+                    }
+                },
+            ]
+        })
+
+        GetCoursePackages?.CoursePackage?.InstituteCourse
+
+        res.status(200).json(GetCoursePackages?.CoursePackage?.InstituteCourse?.ClassSchedules)
+    } catch (error) {
+        console.log(`error occurred while Getting single institute course: ${error.message}`);
+        return res.status(500).json({ error });
+    }
+}
+
+export const CreateTimeTableByStaff = async (req, res) => {
+    try {
+
+        const NewSchedule = await TimeTable.bulkCreate(req.body.Events)
+        const AlotInstructor = await IE_Relation.bulkCreate(req.body.AssignedInstructors)
+
+
+        res.status(200).json(NewSchedule)
     } catch (error) {
         console.log(`error occurred while Getting single institute course: ${error.message}`);
         return res.status(500).json({ error });

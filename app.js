@@ -16,16 +16,22 @@ import { Server as SocketServer } from "socket.io";
 import { AdminEvents } from "./Events/Admin/Admin.js";
 import { StudentEvents } from "./Events/Student/Student.js";
 import { StaffEvents } from "./Events/Institute/Staff/Staff.js";
-import './Server.js'
+import { InstituteAdminEvents } from "./Events/Institute/Admin/Admin.js";
+const app = Express();
+import './Server.js';
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}))
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: "./Config/config.env" })
 }
-  
+
 const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 export const Stripe = stripe(process.env.STRIPE_SECRET_KEY)
 
-const app = Express();
+
 const server = http.createServer(app)
 const CorsOptions = {
   cors: {
@@ -33,45 +39,42 @@ const CorsOptions = {
     credentials: true,
   }
 }
-const io = new SocketServer(server, { ...CorsOptions });
-const Admin = io.of('/admin');
-const InstituteAdmin = io.of('/institute/admin');
-const InstituteStaff = io.of('/institute/staff');
-const InstituteInstructor = io.of('/institute/instructor');
+export const io = new SocketServer(server, { ...CorsOptions });
+export const Admin = io.of('/admin');
+export const InstituteAdmin = io.of('/institute/admin');
+export const InstituteStaff = io.of('/institute/staff');
+export const InstituteInstructor = io.of('/institute/instructor');
 
 AdminEvents(Admin);
 StudentEvents(io)
-StaffEvents(io)
+InstituteAdminEvents(InstituteAdmin)
+StaffEvents(InstituteStaff)
 
 
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true,
-}))
 
 const Port = process.env.PORT || 9000
 
 // SocketFunction(io)
-app.use(cors());
+app.options(cors());
 
 app.use(CookieParser())
-app.use(Express.urlencoded({ limit: "50mb", extended: true }));
-app.use(Express.json({ limit: "50mb" })); 
+app.use(Express.urlencoded({ limit: "5mb", extended: true }));
+app.use(Express.json({ limit: "5mb" }));
 
 app.use('/api', Irouter);
 app.use('/api', Aroutes);
 app.use('/api', Srouter);
-app.use('/api', CRoutes) 
+app.use('/api', CRoutes)
+Realtions();
 
 
 app.use(Express.static(path.join(__dirname, "./build")))
-Realtions();
 if (process.env.NODE_ENV === 'production') {
   const a = path.join(__dirname, "./build/index.html")
   app.get("*", (req, res) => {
 
     res.sendFile(a);
-  });
+  }); 
 }
 
 server.listen(Port, () => console.log(`App  is  runnging on port ${Port}`)); 

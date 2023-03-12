@@ -36,7 +36,6 @@ export const NewCourse = async (req, res) => {
                 { model: LicenseTypes, attributes: ["LicenseTypeName", "LicenseTypeId"], },
                 { model: VehicleTypes, attributes: ["VehicleTypeName", "VehicleTypeId"], },
             ]
-
         })
 
         res.status(201).json(CourseGot)
@@ -51,15 +50,13 @@ export const NewCourse = async (req, res) => {
 
 export const UpdateCourse = async (req, res) => {
     try {
-        const CheckCourse = await Course.findOne({
-            where: { CoursePK: req.body.CoursePK },
-        });
+        const CheckCourse = await Course.findOne({ where: { CoursePK: req.body.CoursePK } });
 
         if (!CheckCourse) res.status(401).json({ message: "Course not found" })
 
-
+    
         const UpdateCourse = await Course.update(req.body, { where: { CoursePK: req.body.CoursePK } });
- 
+         
         let CourseGot = await Course.findOne({
             where: { CoursePK: req.body.CoursePK, Status: "Viewable" },
             attributes: { exclude: ["VehicleTypeFK", "LicenseTypeFK", "SubLicenseTypeFK"] },
@@ -113,7 +110,7 @@ export const GetAllCourses = async (req, res) => {
             order: [
                 ['createdAt', 'ASC'],
             ],
-            ...Paginate(req.body),
+            // ...Paginate({ Page: 0, PageSize: 10 }),
             include: [
                 { model: SubLicenseTypes, attributes: ["SubLicenseTypeName", "SubLicenseTypeId"] },
                 { model: LicenseTypes, attributes: ["LicenseTypeName", "LicenseTypeId"], required: true, },
@@ -144,13 +141,14 @@ export const DeleteCourse = async (req, res) => {
         if (FindCourse.ByInstitute !== req.User.InstituteId)
             return res.status(401).json({ messsage: "You cannot delete this course" });
 
-        const DeletedCourse = await Course.update({ Status: 'Deleted' },
-            {
-                where: {
-                    CoursePK: FindCourse.CoursePK
-                }
-            }
-        )
+        // const DeletedCourse = await Course.update({ Status: 'Deleted' },
+        //     {
+        //         where: {
+        //             CoursePK: FindCourse.CoursePK
+        //         }
+        //     }
+        // )
+        const DestroyCourse = await Course.destroy({ where: { CoursePK: FindCourse.CoursePK } })
         return res.status(200).json({ messsage: "Course Deleted Successfully" });
     } catch (error) {
         console.log(`error occured while DeleteCourse ${error}`);

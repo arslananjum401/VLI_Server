@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="46.162" height="36.929" viewBox="0 0 46.162 36.929">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Icon_awesome-chalkboard-teacher" data-name="Icon awesome-chalkboard-teacher" d="M15,25.389a1.65,1.65,0,0,0-.509.079,9.515,9.515,0,0,1-2.953.5,9.523,9.523,0,0,1-2.954-.5,1.646,1.646,0,0,0-.509-.079A8.079,8.079,0,0,0,0,33.512a3.453,3.453,0,0,0,3.462,3.417H19.619a3.453,3.453,0,0,0,3.462-3.417A8.079,8.079,0,0,0,15,25.389ZM11.54,23.081a6.924,6.924,0,1,0-6.924-6.924A6.924,6.924,0,0,0,11.54,23.081ZM42.7,0H15A3.525,3.525,0,0,0,11.54,3.577V6.924a9.128,9.128,0,0,1,4.616,1.284V4.616H41.546V25.389H36.929V20.773H27.7v4.616H22.2a9.193,9.193,0,0,1,2.863,4.616H42.7a3.525,3.525,0,0,0,3.462-3.577V3.577A3.525,3.525,0,0,0,42.7,0Z" transform="translate(0)" fill="#a1a3ef"/>
+    </clipPath>
+  </defs>
+  <g id="Mask_Group_189" data-name="Mask Group 189" transform="translate(0)" clip-path="url(#clip-path)">
+    <path id="BG" d="M30,0H64.3a4,4,0,0,1,4,4V33.084a30,30,0,0,1-30,30H4a4,4,0,0,1-4-4V30A30,30,0,0,1,30,0Z" transform="translate(-9.073 -10.767)" fill="#a1a3ef"/>
+  </g>
+</svg>

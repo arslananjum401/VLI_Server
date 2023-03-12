@@ -36,26 +36,29 @@ export const InstituteCourseModel = async (sequelize, DataTypes, InstituteModel,
 
 
         ShortDescription: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(500),
             allowNull: false,
             validate: {
-                max: 100
+                max: 500
             }
         },
         LongDescription: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(1500),
             allowNull: false
         },
         CourseCurriculum: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(1500),
         },
         Possible_FAQs: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(250),
         },
         Publish: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        }
+            type: DataTypes.STRING,
+            defaultValue: "IN PROGRESS"
+        },
+        PublishResponse: {
+            type: DataTypes.STRING
+        },
     },
         {
             timestamps: true,
@@ -136,7 +139,7 @@ export const CourseSyllabusModel = async (sequelize, DataTypes, InstituteCourses
             primaryKey: true
         },
         CourseDescription: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(1000),
             allowNull: false,
         },
         InstituteCourseFK: {
@@ -166,7 +169,7 @@ export const ClassScheduleModel = async (sequelize, DataTypes, InstituteCoursesM
             primaryKey: true
         },
         ClassDescription: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(1000),
             allowNull: false,
         },
         InstituteCourseFK: {

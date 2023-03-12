@@ -18,12 +18,11 @@ export const InsCheckErrorHelper = (obj, res) => {
         }
     };
 
-    if (ReturnErr) {
-        res.status(401).json(ErrorObj);
-    }
+    if (ReturnErr) 
+        res.status(404).json(ErrorObj);
+    
     return ReturnErr;
 }
-
 
 export const SignupErrorHelper = (ErrorObject, res, Body) => {
     let ErrorObj = {}, ReturnErr = false;

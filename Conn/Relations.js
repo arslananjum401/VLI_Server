@@ -1,6 +1,6 @@
 import db from './connection.js';
 import { CourseEnrollmentRelations, CourseRelations, InstituteCourseRelations } from './Relations/CourseRelations.js';
-const { Institute, Course, User, Instructor, Cart, Book, WishList, Product, LicenseTypes, Countries, VehicleTypes, CourseEnrollment, SubLicenseTypes, CoursePackages, InstituteCourses, Vehicle, VehicleImages, InstituteUser, UserEmailValidation, UserResetPassword, ForwardedCourse, BookReputationInfo, BoughtCourse, BoughtBook, CourseInstructors } = db;
+const { Institute, User, Instructor, Book, WishList, Product, LicenseTypes, SubLicenseTypes, CoursePackages, InstituteCourses, Vehicle, VehicleImages, InstituteUser, UserEmailValidation, UserResetPassword, ForwardedCourse, BoughtCourse, BoughtBook, CourseInstructors, StudentInfo, TimeTable, Notification, Course,Buying } = db;
 
 function UserRelations() {
     Institute.hasOne(InstituteUser, { foreignKey: "InstituteFK" });
@@ -8,6 +8,10 @@ function UserRelations() {
 
     User.hasOne(InstituteUser, { foreignKey: "UserFK" });
     InstituteUser.belongsTo(User, { foreignKey: "UserFK" });
+
+
+    User.hasOne(StudentInfo, { foreignKey: "UserFK" });
+    StudentInfo.belongsTo(User, { foreignKey: "UserFK" });
 
     //EmailValidation and User Relation 
     UserEmailValidation.belongsTo(User, { foreignKey: "UserFK" })
@@ -21,6 +25,10 @@ function UserRelations() {
     User.hasOne(Instructor, { foreignKey: "UserFK" })
     Instructor.belongsTo(User, { foreignKey: "UserFK" })
 
+
+    User.hasMany(Notification, { foreignKey: "UserFK" })
+    Notification.belongsTo(User, { foreignKey: "UserFK" })
+
 }
 
 
@@ -29,16 +37,17 @@ export const Realtions = () => {
     //Institute and User Relation
     UserRelations()
     CourseRelations()
-    InstituteCourseRelations(); 
+    InstituteCourseRelations();
 
-    Institute.hasOne(ForwardedCourse, { foreignKey: "InstituteFK" });
+    Institute.hasMany(ForwardedCourse, { foreignKey: "InstituteFK" });
     ForwardedCourse.belongsTo(Institute, { foreignKey: "InstituteFK" });
-    User.hasOne(ForwardedCourse, { foreignKey: "UserFK" });
-    ForwardedCourse.belongsTo(User, { foreignKey: "UserFK" });
-    Product.hasOne(ForwardedCourse, { foreignKey: "ProductFK" });
-    ForwardedCourse.belongsTo(Product, { foreignKey: "ProductFK" });
 
 
+
+    ForwardedCourse.belongsTo(Course, { foreignKey: "CourseFK" });
+    Course.hasMany(Course, { foreignKey: "CourseFK" });
+
+ 
     Instructor.belongsToMany(InstituteCourses, { through: CourseInstructors, foreignKey: "InstructorFK" })
     InstituteCourses.belongsToMany(Instructor, { through: CourseInstructors, foreignKey: "InstituteCourseFK" })
 
@@ -52,6 +61,10 @@ export const Realtions = () => {
 
     BoughtCourse.belongsTo(CoursePackages, { foreignKey: "CoursePackagesFK" });
     CoursePackages.hasMany(BoughtCourse, { foreignKey: "CoursePackagesFK" });
+  
+  
+    BoughtCourse.belongsTo(Buying, { foreignKey: "BuyingFK" });
+    Buying.hasOne(BoughtCourse, { foreignKey: "BuyingFK" });
 
 
     BoughtBook.belongsTo(Book, { foreignKey: "BookFK" });
@@ -74,12 +87,16 @@ export const Realtions = () => {
     LicenseTypes.hasMany(Instructor, { foreignKey: 'Speciality' });
 
 
+    TimeTable.belongsTo(Instructor, { foreignKey: 'InstructorFK' });
+    Instructor.hasOne(TimeTable, { foreignKey: 'InstructorFK' });
+
+
 
     WishList.belongsTo(InstituteCourses, { foreignKey: "ProductFK" });
     InstituteCourses.hasMany(WishList, { foreignKey: "ProductFK" });
-    
+
     WishList.belongsTo(User, { foreignKey: "UserId" });
-    
+
     CourseEnrollmentRelations()
 }
 

@@ -6,14 +6,20 @@ export const NotificationModel = async (sequelize, DataTypes, UserModel) => {
             allowNull: false,
             primaryKey: true
         },
-        Message: {
-            type: DataTypes.STRING(1234),
-            allowNull: false,
+
+        NotificationType: {
+            type: DataTypes.STRING(100),
+        },
+        RelatedFK: {
+            type: DataTypes.UUID,
         },
 
+        Message: {
+            type: DataTypes.STRING(1234),
+        },
+ 
         FromUserId: {
             type: DataTypes.UUID,
-            allowNull: false,
             references: {
                 model: UserModel,
                 key: 'UserId'
@@ -22,14 +28,11 @@ export const NotificationModel = async (sequelize, DataTypes, UserModel) => {
 
         FromUserType: {
             type: DataTypes.STRING,
-            allowNull: false,
+
         },
 
-
-        
         ToUserId: {
             type: DataTypes.UUID,
-            allowNull: false,
             references: {
                 model: UserModel,
                 key: 'UserId'
@@ -37,12 +40,11 @@ export const NotificationModel = async (sequelize, DataTypes, UserModel) => {
         },
         ToUserType: {
             type: DataTypes.STRING,
-            allowNull: false,
+
         },
 
         MarkAsRead: {
             type: DataTypes.BOOLEAN,
-            allowNull: false,
             defaultValue: false
         }
     },

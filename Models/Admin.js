@@ -99,7 +99,7 @@ export const VehicleTypesModel = async (sequelize, DataTypes) => {
 }
 
 
-export const CourseModel = async (sequelize, DataTypes, ProductModel, VehicleTypeModel, LicenseTypesModel, SubLicenseTypesModel) => {
+export const CourseModel = async (sequelize, DataTypes, VehicleTypeModel, LicenseTypesModel, SubLicenseTypesModel) => {
     return await sequelize.define('Course', {
 
         CoursePK: {
@@ -117,7 +117,7 @@ export const CourseModel = async (sequelize, DataTypes, ProductModel, VehicleTyp
         },
         VehicleTypeFK: {
             type: DataTypes.UUID,
-            allowNull: false, 
+            allowNull: false,
             references: {
                 model: VehicleTypeModel,
                 key: 'VehicleTypeId'
@@ -125,9 +125,9 @@ export const CourseModel = async (sequelize, DataTypes, ProductModel, VehicleTyp
         },
         LicenseTypeFK: {
             type: DataTypes.UUID,
-            allowNull: false, 
+            allowNull: false,
             references: {
-                model: LicenseTypesModel, 
+                model: LicenseTypesModel,
                 key: 'LicenseTypeId'
             },
         },
@@ -244,43 +244,12 @@ export const CountryLicenseTypeModel = async (sequelize, DataTypes) => {
     )
 }
 
-export const bookModel = async (sequelize, Datatypes, UserModel, ProductModel) => {
+export const bookModel = async (sequelize, Datatypes, UserModel) => {
     const Ebook = await sequelize.define('Book', {
         BookId: {
             type: Datatypes.UUID,
             defaultValue: Datatypes.UUIDV4,
             primaryKey: true
-        },
-        ProductFK: {
-            type: Datatypes.UUID,
-            allowNull: false,
-            references: {
-                model: ProductModel,
-                key: 'ProductId'
-            }
-
-        },
-        AurhotName: {
-            type: Datatypes.STRING,
-            allowNull: false
-        },
-
-        AboutBook: {
-            type: Datatypes.STRING,
-            allowNull: false
-        },
-        BookCover: {
-            type: Datatypes.STRING,
-            allowNull: false,
-        },
-        E_Book: {
-            type: Datatypes.BOOLEAN,
-            defaultValue: true,
-            allowNull: false,
-        },
-        HardBook: {
-            type: Datatypes.BOOLEAN,
-            allowNull: false,
         },
         CreatedBy: {
             type: Datatypes.UUID,
@@ -290,14 +259,63 @@ export const bookModel = async (sequelize, Datatypes, UserModel, ProductModel) =
                 key: 'UserId'
             }
         },
-        Price: {
-            type: Datatypes.FLOAT,
+
+        BookTitle: {
+            type: Datatypes.STRING,
             allowNull: false
         },
+        AurhotName: {
+            type: Datatypes.STRING,
+            allowNull: false
+        },
+
+
+        E_BookCategory: {
+            type: Datatypes.STRING,
+            allowNull: false,
+        },
+        AboutBook: {
+            type: Datatypes.STRING,
+            allowNull: false
+        },
+        PossibleKeywords: {
+            type: Datatypes.STRING,
+            allowNull: false
+        },
+        BookRating: {
+            type: Datatypes.FLOAT,
+            allowNull: false,
+        },
+        BookCover: {
+            type: Datatypes.STRING,
+            allowNull: false,
+        },
+
+        BookType: {
+            type: Datatypes.STRING,
+            allowNull: false,
+        },
+
+
+
+
         Copies: {
             type: Datatypes.INTEGER,
             allowNull: false
         },
+        Price: {
+            type: Datatypes.FLOAT,
+            allowNull: false
+        },
+        DevliveryCharges: {
+            type: Datatypes.FLOAT,
+            allowNull: false
+        },
+        PublishDate: {
+            type: Datatypes.FLOAT,
+            allowNull: false
+        },
+
 
 
     },

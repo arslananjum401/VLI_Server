@@ -14,9 +14,8 @@ const OnlyForUpdateVehicle = (req, key, path) => {
 }
 
 export const DataParser = (req, res, next) => {
-
+ 
     try {
-
         for (const [key, value] of Object.entries(req.body)) {
             try {
 
@@ -26,20 +25,19 @@ export const DataParser = (req, res, next) => {
                 null
             }
         }
-
-
-        for (const [key, value] of Object.entries(req.files)) {
-            const path = value[0].path.replaceAll(`\\`, '/');
-            let regex = /Vehicle\/update/ig
-            if (req.url.match(regex)) {
-
-                OnlyForUpdateVehicle(req, key, path)
-
-            } else
-                req.body[key] = path
  
-        }
+        if (req.files)
+            for (const [key, value] of Object.entries(req.files)) {
+                const path = value[0].path.replaceAll(`\\`, '/');
+                let regex = /Vehicle\/update/ig
+                if (req.url.match(regex)) {
 
+                    OnlyForUpdateVehicle(req, key, path)
+
+                } else
+                    req.body[key] = path
+
+            }
         next()
     } catch (error) {
         console.log("Error Occurred while parsing data: " + error);

@@ -1,6 +1,6 @@
-import { MulterMiddleware } from "../MulterMiddleware.js";
+import { MulterMiddleware } from "./MulterMiddleware.js";
 
-export const MulterForAdmin = (req, res, next) => {
+export const MulterForBookCover = (req, res, next) => {
     let MulterVals = {};
     MulterVals.filepath = './Public/Book/CoverImage'
     MulterVals.UploadFields = [{ name: 'BookCover' }]

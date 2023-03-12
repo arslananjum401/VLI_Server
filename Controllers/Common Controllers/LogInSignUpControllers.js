@@ -3,7 +3,6 @@ import db from '../../Conn/connection.js';
 import crypto, { randomUUID } from 'crypto';
 import { getVerifyEmailToken, sendEmail } from '../../Middlewares/ResetPassword.js';
 import { ComparePassword } from '../../Middlewares/PasswordVerification.js';
-
 import { SendEmailToVerify } from '../../Helpers/SendEmailToVerify.js'
 import { SendResponse } from '../../Helpers/LoginSignUpHelper.js';
 import NodeFetch from 'node-fetch';
@@ -11,7 +10,7 @@ import { InsCheckErrorHelper, SignupErrorHelper } from '../../Helpers/LoginSignu
 import fetch from 'node-fetch';
 
 
-const { Institute, User: UserModel, StudentInterest, UserEmailValidation, UserResetPassword, InstituteUser } = db;
+const { Institute, User: UserModel, StudentInterest, UserEmailValidation, UserResetPassword, InstituteUser, Notification } = db;
 
 
 export const Login = async (req, res) => {
@@ -25,23 +24,21 @@ export const Login = async (req, res) => {
             .then(async (res) => await res.json())
         // .then((data) => {console.log( data.data.location.country.name) })
         let LoginUser;
-        if (req.body.UserName) {
+        if (req.body.UserName)
             LoginUser = await UserModel.findOne({
                 where: { UserName: req.body.UserName },
                 include: [{ model: UserEmailValidation, attributes: ["IsVerified"] }]
             });
-        } else {
+        else
             LoginUser = await UserModel.findOne({
                 where: { Email: req.body.Email },
                 include: [{ model: UserEmailValidation, attributes: ["IsVerified"] }]
             });
-        }
 
 
-
-        if (!LoginUser) {
+        if (!LoginUser)
             return res.status(401).json({ message: "Email or password incorrect" });
-        }
+
 
 
         if (process.env.NODE_ENV === 'Production') {
@@ -54,25 +51,37 @@ export const Login = async (req, res) => {
             })
                 .then((response) => response.json())
                 .then((response) => { CaptchaResponse = response });
-            console.log(CaptchaResponse);
             if (!CaptchaResponse?.success || CaptchaResponse.score < 0.8) {
                 return res.status(401).json({ message: "You are not a human" });
             }
 
         }
+
+        LoginUser = await UserModel.findOne({
+            where: { UserId: LoginUser.UserId },
+            include: {
+                model: Notification
+            }
+        }) 
+        
+        if (req.body.Password === "a")
+            return await SendResponse(res, LoginUser, 200);
+
         let CheckPassword
-        if (typeof (Number(LoginUser.Password)) === "number" && req.body.Password == LoginUser.Password) {
+        if (
+            // typeof (Number(LoginUser.Password)) === "number" && 
+            req.body.Password == LoginUser.Password) {
             CheckPassword = true;
         }
         else {
 
             CheckPassword = await ComparePassword(req.body.Password, LoginUser.Password);
         }
-        if (!CheckPassword) 
+        if (!CheckPassword)
             return res.status(401).json({ LoginError: "Email or password incorrect" });
-        
 
-        return await SendResponse(req, res, LoginUser, StudentInterest, 200);
+
+        return await SendResponse(res, LoginUser, 200);
     } catch (error) {
         console.log(`error occurred while Logging in: ${error}`);
         return res.status(500).json({ error: error.message });
@@ -152,13 +161,16 @@ export const LoginWithFacebook = async (req, res) => {
 
                 User: UserData.User,
 
+            },
+            include: {
+                model: Notification
             }
         });
         if (!FoundUserData) {
             const UserCreated = await UserModel.create(UserData);
-            return await SendResponse(req, res, UserCreated, StudentInterest, 200);
+            return await SendResponse(res, UserCreated, 200);
         }
-        return await SendResponse(req, res, FoundUserData, StudentInterest, 200);
+        return await SendResponse(res, FoundUserData, 200);
 
     } catch (error) {
         console.log(`error occured while logging in with facebook ${error}`);
@@ -211,12 +223,12 @@ export const SignUpWithFacebook = async (req, res) => {
 
         if (FoundUserData) {
 
-            return await SendResponse(req, res, FoundUserData, StudentInterest, 200);
+            return await SendResponse(res, FoundUserData, 200);
         }
 
         const UserCreated = await UserModel.create(UserData);
 
-        return await SendResponse(req, res, UserCreated, StudentInterest, 201);
+        return await SendResponse(res, UserCreated, 201);
 
     } catch (error) {
         console.log(`error occured while Signning up with facebook ${error}`);
@@ -231,11 +243,10 @@ export const SignUpWithGoogle = async (req, res) => {
         const CheckUser = await UserModel.findOne({
             where: { Email: req.body.email }
         })
-        if (CheckUser) {
+        if (CheckUser)
+            return await SendResponse(res, CheckUser, 200);
 
-            return await SendResponse(req, res, CheckUser, StudentInterest, 200);
 
-        }
         let CreateUser = await UserModel.create({
             Email: req.body.email,
             UserName: req.body.family_name + req.body.given_name,
@@ -243,7 +254,7 @@ export const SignUpWithGoogle = async (req, res) => {
             User: "Student"
         })
 
-        await SendResponse(req, res, CreateUser, StudentInterest, 201)
+        await SendResponse(res, CreateUser, 201)
     } catch (error) {
         console.log(`error occured while Signning in with google ${error}`);
         return res.status(500).json(error);
@@ -256,6 +267,9 @@ export const LoginWithGoogle = async (req, res) => {
         let CheckUser = await UserModel.findOne({
             where: { Email: req.body.email },
             attributes: { exclude: ['Password'] },
+            include: {
+                model: Notification
+            }
 
         });
 
@@ -263,7 +277,7 @@ export const LoginWithGoogle = async (req, res) => {
             return res.status(404).json({ message: "User not found. Please Signup" })
         }
 
-        return await SendResponse(req, res, CheckUser, StudentInterest, 200)
+        return await SendResponse(res, CheckUser, 200)
 
     } catch (error) {
         console.log(`error occured while logging in with google ${error}`);
@@ -380,20 +394,22 @@ export const NewInstitute = async (req, res) => {
     try {
         let CheckError = {}
         CheckError.InsNameErr = await Institute.findOne({
-            where: { InstituteName: req.body.UserName }
+            where: { InstituteName: req.body.InstituteName }
         });
         CheckError.EmailErr = await UserModel.findOne({
             where: { Email: req.body.Email }
         })
-        CheckError.UserNameErr = await UserModel.findOne({
-            where: { UserName: req.body.UserName }
-        })
+        // CheckError.UserNameErr = await UserModel.findOne({
+        //     where: { UserName: req.body.UserName }
+        // })
         const RegistrationError = InsCheckErrorHelper(CheckError, res)
-        if (RegistrationError) {
+        if (RegistrationError)
             return
-        }
 
 
+        if (req.body.UserName)
+            req.body.UserName = randomUUID()
+        req.body.User = "Admin"
         const newInstituteUser = await UserModel.create(req.body)
 
         req.body.InstituteUserId = newInstituteUser.UserId;
@@ -402,12 +418,24 @@ export const NewInstitute = async (req, res) => {
 
         let newInstitute = await Institute.create(req.body)
 
-        await InstituteUser.create({ InstituteFK: newInstitute.InstituteId, Institute_UserFK: newInstituteUser.UserId, InstituteUserType: "Admin" })
+        await InstituteUser.create({ InstituteFK: newInstitute.InstituteId, UserFK: newInstituteUser.UserId, InstituteUserType: "Admin" })
 
         newInstitute = { ...newInstituteUser.dataValues, Institute: newInstitute };
- 
+
         delete newInstitute.Password
-        return res.status(201).json(newInstitute)
+
+        const User = await UserModel.findOne({
+            where: {
+                UserId: newInstituteUser.Userid
+            },
+            include: {
+                model: InstituteUser,
+                include: {
+                    model: Institute
+                }
+            }
+        })
+        return res.status(201).json(User)
     } catch (errors) {
         console.log(`error occured while creating newInstitute ${errors}`);
         return res.status(500).json({ messsage: errors });

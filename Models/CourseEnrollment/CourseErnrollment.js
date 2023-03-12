@@ -32,6 +32,7 @@ export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageM
             }
         },
 
+
     },
         {
             timestamps: true,
@@ -40,4 +41,33 @@ export const CourseEnrollmentModel = async (sequelize, DataTypes, CoursePackageM
         }
     )
     return CourseEnrollment;
+}
+
+
+export const InstructorEnrollmentRelationModel = async (sequelize, DataTypes, CourseEnrollmentModel, InstructorModel) => {
+    const IE_Relation = await sequelize.define('IE_Relation', {
+        EnrollmentFK: {
+            type: DataTypes.UUID,
+            references: {
+                model: CourseEnrollmentModel,
+                key: "EnrollmentId"
+            }
+        },
+        
+        InstructorFK: {
+            type: DataTypes.UUID,
+            references: {
+                model: InstructorModel,
+                key: "InstructorId"
+            }
+        },
+
+    },
+        {
+            timestamps: true,
+            createdAt: true,
+            updatedAt: false,
+        }
+    )
+    return IE_Relation;
 }

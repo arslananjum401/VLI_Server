@@ -1,19 +1,17 @@
 import { response } from 'express';
 import { Op } from 'sequelize';
 import db from '../../Conn/connection.js'
-const { Course, Product, LicenseTypes, ForwardedCourse, CProductToInstitute,InstituteCoursePackage } = db;
+const { Course, Product, LicenseTypes, ForwardedCourse, CProductToInstitute, InstituteCoursePackage } = db;
 
 const Query = {
     attributes: ["ForwardedCourseId", "ForwardedCourseNotes", "Status"],
-    include: [{
-        model: Product,
-        attributes: { exclude: ["BookId", "createdAt"] },
-        include: {
-            model: Course,
-            attributes: { exclude: ["RunningCourse", "Promotion", "Completed", "Cancel", "Status", "createdAt", "BookId"] },
-            include: { model: LicenseTypes, attributes: ["LicenseTypeId", "LicenseTypeName"] }
-        }
-    }]
+
+    include: {
+        model: Course,
+        attributes: { exclude: ["RunningCourse", "Promotion", "Completed", "Cancel", "Status", "createdAt", "BookId"] },
+        include: { model: LicenseTypes, attributes: ["LicenseTypeId", "LicenseTypeName"] }
+    }
+
 }
 Op
 export const ForwardCourseTostaff = async (req, res) => {
@@ -22,7 +20,7 @@ export const ForwardCourseTostaff = async (req, res) => {
             where: {
                 ProductFK: req.body.ProductFK,
                 InstituteFK: req.User.Institute.InstituteId
-            }
+            } 
         })
         if (FindForwardedCourse) {
             return res.status(200).json({ message: "Course Already Forwarded" })
@@ -50,18 +48,22 @@ export const AcceptForwardedCourse = async (req, res) => {
         req.params.cProductInstituteId;
 
 
-        const GetCourse = await CProductToInstitute.findOne({ where: { 
-            cProductInstituteId: req.params.cProductInstituteId,
-            cPI_InstituteId:req.User.Institute.InstituteId
-         } });
+        const GetCourse = await CProductToInstitute.findOne({
+            where: {
+                cProductInstituteId: req.params.cProductInstituteId,
+                cPI_InstituteId: req.User.Institute.InstituteId
+            }
+        });
 
         if (!GetCourse)
             return res.status(404).json({ message: "Course not found or has been deleted" });
 
-        const UpdateCourse = CProductToInstitute.update(req.body, { where: { 
-            cProductInstituteId: req.params.cProductInstituteId,
-            cPI_InstituteId:req.User.Institute.InstituteId
-        } });
+        const UpdateCourse = CProductToInstitute.update(req.body, {
+            where: {
+                cProductInstituteId: req.params.cProductInstituteId,
+                cPI_InstituteId: req.User.Institute.InstituteId
+            }
+        });
         const GetUpdatedCourse = await Product.findOne({
             include: [
                 {
@@ -72,7 +74,7 @@ export const AcceptForwardedCourse = async (req, res) => {
                     model: CProductToInstitute,
                     where: {
                         cProductInstituteId: req.params.cProductInstituteId,
-                        cPI_InstituteId:req.User.Institute.InstituteId,
+                        cPI_InstituteId: req.User.Institute.InstituteId,
                         Publish: true
                     },
                     attributes: ["ShortDescription", "LongDescription", "CourseCurriculum", "Possible_FAQs", "InstructorFK"],
@@ -101,7 +103,7 @@ export const GetForwardedCourses = async (req, res) => {
                 // Publish: false,
             }
         })
-        
+
 
         if (GetCourseEditedByStaff.length <= 0) {
             return res.status(404).json({ message: "Nothing found" })

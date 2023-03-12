@@ -91,17 +91,18 @@ export const GetSingleStaffMemember = async (req, res) => {
 export const GetAllStaffMemembers = async (req, res) => {
     try {
 
-        if (!CheckUUID(req.params.UserId))
-            return res.status(404).json({ message: "Invalid UserId or not exist" })
+        // if (!CheckUUID(req.params.UserId))
+        //     return res.status(404).json({ message: "Invalid UserId or not exist" })
 
 
         const GetCreatedUser = await User.findAll({
 
             include: [{
                 model: InstituteUser, attributes: ["InstituteUserType"],
+                where: { InstituteUserType: "Staff" },
                 include: {
                     model: Institute,
-                    where: { InstituteFK: req.User.Institute.InstituteId },
+                    where: { InstituteId: req.User.Institute.InstituteId },
                 }
             }]
         })

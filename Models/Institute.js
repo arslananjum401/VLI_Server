@@ -29,19 +29,25 @@ export const Institute = async (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+
+        Address: {
+            type: DataTypes.STRING,
+            // allowNull: false
+
+        },
         Country: {
             type: DataTypes.STRING,
-            allowNull: false
-
+            // allowNull: false
+            // 
         },
         State: {
             type: DataTypes.STRING,
-            allowNull: false
+            // allowNull: false
 
         },
         City: {
             type: DataTypes.STRING,
-            allowNull: false
+            // allowNull: false
 
         },
         MOTR_Slip: {
@@ -76,19 +82,19 @@ export const Institute = async (sequelize, DataTypes) => {
     return institute;
 }
 
-export const ForwardedCourseModel = async (sequelize, DataTypes, InstituteModel, ProductModel, UserModel) => {
+export const ForwardedCourseModel = async (sequelize, DataTypes, CourseModel, InstituteModel) => {
     return await sequelize.define('ForwardedCourse', {
         ForwardedCourseId: {
             type: DataTypes.UUID,
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4
         },
-        ProductFK: {
+        CourseFK: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: ProductModel,
-                key: "ProductId"
+                model: CourseModel,
+                key: "CoursePK"
             }
         },
         InstituteFK: {
@@ -97,14 +103,6 @@ export const ForwardedCourseModel = async (sequelize, DataTypes, InstituteModel,
             references: {
                 model: InstituteModel,
                 key: "InstituteId"
-            }
-        },
-        UserFK: {
-            type: DataTypes.UUID,
-            allowNull: false,
-            references: {
-                model: UserModel,
-                key: "UserId"
             }
         },
         Status: {

@@ -3,7 +3,12 @@ import { CapturePaymentFun, CreateOrderFun, generateAccessToken } from '../../He
 
 import { AddShoppingInDb, CheckCourseEnrollment, GetCoursePackagePrice } from '../../Helpers/CheckoutHelpers.js';
 import { EnrollInCourse } from "../../Helpers/EnrollmentHelper.js";
-const { Bought, BoughtCourse, InstituteCoursePackage, Product, CProductToInstitute, } = db
+import { InstituteStaff, io } from "../../app.js";
+import { GetSocketId } from "../../Events/Helpers/SaveUser.js";
+import { StafftArr } from "../../Events/Institute/Staff/Staff.js";
+import { Paginate } from "../../Helpers/Paginate.js";
+
+const { Bought, BoughtCourse, CoursePackages, StudentInfo, InstituteCourses, Institute, Notification, User, InstituteUser } = db
 
 export const BuyProducts = async (req, res) => {
     try {
@@ -23,10 +28,10 @@ export const BuyProducts = async (req, res) => {
         }
 
 
-        const FindCoursePackage = await InstituteCoursePackage.findOne({
-            where: { IC_PackagesId: req.body.CoursePackageId },
-            include: [{ model: CProductToInstitute, include: { model: Product } }]
-        })
+        // const FindCoursePackage = await InstituteCoursePackage.findOne({
+        //     where: { IC_PackagesId: req.body.CoursePackageId },
+        //     include: [{ model: CProductToInstitute, include: { model: Product } }]
+        // })
         let url
         // console.log(FindCoursePackage)
         // await BuyPayWithPaypal(req, res, FindCoursePackage, req.body.Currency, url)
@@ -144,11 +149,12 @@ export const BuyProducts = async (req, res) => {
 
 export const CreatePayPalOrder = async (req, res) => {
     try {
-        // const { FindCreateBought } = await CheckCourseEnrollment(req, res)
-        // // console.log(FindCreateBought)
-        // if (FindCreateBought) {
+
+        // const FindCreateBuying = await CheckCourseEnrollment(req, res)
+        // console.log(FindCreateBuying)
+        // if (FindCreateBuying)
         //     return
-        // }
+
         const { Products, Total, error } = await GetCoursePackagePrice(req, res)
         var create_payment_json = {
             intent: "CAPTURE",
@@ -192,8 +198,11 @@ export const CreatePayPalOrder = async (req, res) => {
             //     }
             // }
         }
+
+        if (error)
+            return
         const order = await CreateOrderFun(create_payment_json);
-        // console.log(order)
+
         return res.status(200).json(order)
     } catch (error) {
         console.log(`Error occurred while creating paypal order ${error}`)
@@ -206,29 +215,147 @@ export const CapturePayPalPayment = async (req, res) => {
     try {
 
         const { OrderId } = req.params;
-        const { FindCreateBought } = await CheckCourseEnrollment(req, res);
 
-        // if (FindCreateBought) {
-        //     return
-        // }
+        const { data, error: CapturePaymentError } = await CapturePaymentFun(OrderId, generateAccessToken);
+        if (CapturePaymentError)
+            return
 
-        const CapturedData = await CapturePaymentFun(OrderId, generateAccessToken);
+
+        let { EnrollmentData, CoursePackageId } = req.body;
+        EnrollmentData.StudentData.Schedule = JSON.stringify(EnrollmentData.StudentData.Schedule)
+        EnrollmentData.StudentData.FreeHours = JSON.stringify(EnrollmentData.StudentData.FreeHours)
+        EnrollmentData.StudentData.UserFK = req.UserId;
+        EnrollmentData.StudentData.DOB = new Date(EnrollmentData.StudentData.DOB);
+        const AddStudentInfo = StudentInfo.create(EnrollmentData?.StudentData)
+        const UpdatePhoneNumber = User.update({ PhoneNumber: EnrollmentData?.StudentData?.PhoneNumber }, {
+            where: {
+                UserId: req.UserId
+            }
+        })
+
+
+
 
         const BoughtCourse = await AddShoppingInDb(req, res);
 
-        if (BoughtCourse.error) {
+        if (BoughtCourse.error)
             return
+
+
+
+        const { error, EnrolledCourse } = await EnrollInCourse(req, res, BoughtCourse);
+
+        if (error)
+            return
+
+        const GetInstitute = await CoursePackages.findOne({
+            where: {
+                CoursePackageId: req.body?.CoursePackageId
+            },
+            include: {
+                model: InstituteCourses,
+                required: true,
+                include: {
+                    model: Institute,
+                    required: true
+                }
+            }
+        })
+        const GetInsId = GetInstitute?.InstituteCourse?.Institute
+        if (GetInstitute?.InstituteCourse?.Institute?.InstituteId) {
+
+
+            const StaffIds = await User.findAll({
+                include: {
+                    model: InstituteUser,
+                    where: {
+                        InstituteUserType: "Staff"
+                    },
+                    include: {
+                        required: true,
+                        model: Institute,
+                        where: {
+                            InstituteId: GetInsId.InstituteId
+                        }
+                    }
+                }
+            })
+            const NotificationData = StaffIds.map(value => {
+                value = {
+                    ToUserId: value?.UserId, ToUserType: "InstituteStaff", NotificationType: "New Enrollment",
+                    Message: "Arrange class for " + EnrollmentData?.StudentData?.FirstName + " " + EnrollmentData?.StudentData?.LastName + ".",
+                    FromUserId: req.UserId, FromUserType: "InstituteAdmin",
+                    RelatedFK: EnrolledCourse.EnrollmentId
+                }
+                return value
+            })
+            const NotificationSend = await Notification.bulkCreate(NotificationData);
+            let GetStaffUser = await User.findAll({
+
+                include: {
+                    model: InstituteUser,
+                    where: { InstituteUserType: "Staff" },
+                    required: true,
+
+                    include: {
+                        model: Institute,
+                        where: { InstituteId: GetInsId?.InstituteId },
+                        required: true,
+                    }
+                }
+            })
+
+
+            GetStaffUser = GetStaffUser.filter((User) => {
+                return GetSocketId(StafftArr, User?.UserId) !== undefined
+            })
+
+
+            GetStaffUser = await Promise.all(GetStaffUser.map(async value => {
+                const AllNotifications = await Notification.findAll({
+                    where: { ToUserId: value.UserId },
+                    ...Paginate({ Page: 1, PageSize: 1 }),
+                    order: [['createdAt', "desc"]]
+                })
+
+                return { UserId: value?.UserId, Notifications: AllNotifications }
+            }))
+
+            GetStaffUser.forEach(async User => {
+                let GetUser = GetSocketId(StafftArr, User.UserId);
+                await new Promise((resolve, reject) => {
+                    InstituteStaff.to(GetUser?.SocketId).emit("CourseRecommended", User?.Notifications);
+                    resolve(true)
+                })
+            })
+  
+            // const Create = await Notification.create({
+            //     NotificationType: "New Enrollment",
+            //     Message: "Arrange class for " + EnrollmentData?.StudentData?.FirstName + " " + EnrollmentData?.StudentData?.LastName,
+            //     ToUserId: req.UserId,
+            //     ToUserType: "InstituteStaff",
+            //     EnrollmentFK: EnrolledCourse.EnrollmentId,
+            //     FromUserId: req.UserId,
+            //     FromUserType: "Student"
+            // })
+
+
+
+
+            // console.log(Create)
+            // const GetNotifications = await Notification.findAll({
+            //     where: {
+            //         ToUserId: req.UserId
+            //     },
+            //     limit: 5
+            // })
+            // io.to(GetInstitute?.InstituteCourse?.Institute?.InstituteId + "Staff")
+            //     .emit("NewStudent", GetNotifications);
         }
 
-        const EnrollInCourseData = await EnrollInCourse(req, res, { ...req.body, BoughtCourse });
-
-        if (EnrollInCourseData.error) {
-            return
-        }
-        console.log(CapturedData)
-        res.status(200).json(CapturedData);
+        res.status(200).json(data);
     } catch (error) {
         console.log(`Error occurred while Capturing paypal order ${error}`)
         res.status(500).json(error);
     }
-}
+} 

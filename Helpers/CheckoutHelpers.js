@@ -1,66 +1,62 @@
 import db from "../Conn/connection.js"
 import fetch from "node-fetch";
 
-const { Bought, InstituteCoursePackage, CProductToInstitute, Product, BoughtCourse, CourseEnrollment } = db;
+const { Buying, CoursePackages, InstituteCourses, Course, BoughtCourse, CourseEnrollment } = db;
 
 export const CheckCourseEnrollment = async (req, res) => {
 
     try {
 
-        let FindCreateBought = false;
+        let FindCreateBuying = false;
         const { CoursePackageId } = req.body
 
-        for (let i = 0; i < CoursePackageId.length; i++) {
 
-            let Package = await Bought.findOne({
-                where: { UserFK: req.UserId },
-                include: [
-                    {
-                        model: BoughtCourse,
-                        where: { CoursePackageFK: CoursePackageId[i]},
-                        required: true
-                    },
-                ]
-            })
-            if (Package) {
-                FindCreateBought = true
-            }
-        }
+        let Package = await Buying.findOne({
+            where: { UserFK: req.UserId },
+            include: [
+                {
+                    model: BoughtCourse,
+                    where: { CoursePackageFK: CoursePackageId },
+                    required: true
+                },
+            ]
+        })
+        if (Package)
+            FindCreateBuying = true
 
 
-        if (FindCreateBought) {
+
+
+        if (FindCreateBuying) {
             res.status(200).json({ message: "Package already bought" })
         }
-        return { FindCreateBought }
+        return FindCreateBuying
 
     } catch (error) {
-
+        console.log(`Error occurred while checking course enrollment ${error}`)
     }
 }
 
 
 export const GetCoursePackagePrice = async (req, res) => {
     try {
-        let Total = 0
-        const FindCoursePackages = await Promise.all(req.body.CoursePackageId.map(async (value) => {
-            return await InstituteCoursePackage.findOne({
-                where: { IC_PackagesId: value },
-                include: [{ model: CProductToInstitute, include: { model: Product } }]
-            })
-        }))
+        let Total = 0;
 
-        if (!FindCoursePackages) {
+        const FindCoursePackages = await CoursePackages.findOne({
+            where: { CoursePackageId: req.body.CoursePackageId },
+            include: [{ model: InstituteCourses, include: { model: Course } }]
+        });
+
+
+
+        if (!FindCoursePackages)
             return res.status(404).json({ message: "Course Package not found" })
-        }
-        let Products = FindCoursePackages.map((Package) => {
-            const ProductName = Package.IC_PackagesId.split('-')[0] + Package.CProductToInstitute.Product.ProductName;
-            return { name: ProductName, sku: ProductName, amount: { value: Package.TotalFee, currency_code: req.body.Currency }, quantity: 1 }
-        })
 
-
-        Products.forEach((value) => {
-            Total = +value.amount.value
-        })
+        let Products
+        const ProductName = FindCoursePackages.CoursePackageId.split('-')[0] + FindCoursePackages.InstituteCourse.Course.CourseName;
+        Products = [{ name: ProductName, sku: ProductName, amount: { value: FindCoursePackages.TotalFee, currency_code: req.body.Currency }, quantity: 1 }
+        ]
+        Total = Products?.amount?.value
         return { Products, Total }
     } catch (error) {
         console.log("Error ocurred while getting course package price and total amount:", error)
@@ -130,21 +126,26 @@ export const generateAccessToken = async () => {
 
 export const AddShoppingInDb = async (req, res) => {
     try {
-        const { CoursePackageId } = req.body;
-        req.body.UserFK = req.UserId;
-        const BoughtR = await Bought.create(req.body);
-        req.body.BoughtCourse = [];
+        const { CoursePackageId, TotalPrice } = req.body;
+
+        const BoughtR = await Buying.create({
+            UserFK: req.UserId,
+            TotalPrice: TotalPrice
+        });
+
+        const BoughtCourseR = await BoughtCourse.create({
+            BuyingFK: BoughtR.BuyingId,
+            InstallmentsPaid: req.body.Installments,
+            CoursePackageFK: CoursePackageId
+        });
+
+        req.body.BoughtCourse = { BoughtCourseFK: BoughtCourseR.BoughtCourseId, CoursePackageFK: CoursePackageId }
 
 
-        for (let i = 0; i < CoursePackageId.length; i++) {
-            req.body.BoughtFK = BoughtR.BoughtId;
-            req.body.CoursePackageFK = CoursePackageId[i];
 
-            const BoughtCourseR = await BoughtCourse.create(req.body);
-            req.body.BoughtCourse.push({ BoughtCourseFK: BoughtCourseR.BoughtCourseId, CoursePackageId: CoursePackageId[i] })
-        }
         return req.body.BoughtCourse
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error })
 
         return { error }

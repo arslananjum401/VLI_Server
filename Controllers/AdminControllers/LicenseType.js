@@ -86,25 +86,7 @@ export const GetAllLicenseTypes = async (req, res) => {
 }
 export const GetAllLicenseTypeCourses = async (req, res) => {
 
-    let IncludeQuery = {
-        include: {
-            model: Course,
-            attributes: ["CourseName", "Description", "CourseThumbnail"], required: true,
-            include: {
-
-                model: InstituteCourses,
-                attributes: ["InstituteCourseId", "ShortDescription"],
-                required: true,
-                include: [
-                    { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"], required: true },
-
-                    { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"], required: true },
-                ]
-            }
-        },
-        order: []
-    }
-
+    let Include = {};
     try {
         const GetLicenseTypes = await LicenseTypes.findOne({
             where: {
@@ -117,6 +99,48 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
         })
         if (!GetLicenseTypes)
             return res.status(401).json({ message: "Not found" })
+        if (GetLicenseTypes.SubLicenseTypes.length > 0) {
+            Include = {
+                include: {
+                    model: SubLicenseTypes,
+                    include: {
+                        model: Course,
+                        attributes: ["CourseName", "Description", "CourseThumbnail"],   required: true,
+                        include: {
+
+                            model: InstituteCourses,
+                            attributes: ["InstituteCourseId", "ShortDescription"],
+                            required: true,
+                            include: [
+                                { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"], required: true,  },
+
+                                { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"],  required: true,},
+                            ]
+                        }
+                    }
+                }
+            }
+
+        } else {
+            Include = {
+                include: {
+                    model: Course,
+                    attributes: ["CourseName", "Description", "CourseThumbnail"], required: true,
+                    include: {
+
+                        model: InstituteCourses,
+                        attributes: ["InstituteCourseId", "ShortDescription"],
+                        required: true,
+                        include: [
+                            { model: CoursePackages, attributes: ["CoursePackageId", "TotalFee", "InstallmentSchedule"], required: true },
+
+                            { model: Institute, attributes: ["InstituteName", "InstituteId", "Country", "State", "City"], required: true },
+                        ]
+                    }
+                }
+            };
+        }
+
 
         if (req.UserId) {
             let Wish = {
@@ -124,20 +148,12 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
                 where: { StudentId: req.UserId },
                 required: false
             }
-            IncludeQuery?.include?.include?.include.push(Wish)
+            if (GetLicenseTypes.SubLicenseTypes.length <= 0)
+                Include?.include?.include?.include.push(Wish)
+            else if (GetLicenseTypes.SubLicenseTypes.length > 0)
+                Include?.include?.include?.include?.include?.push(Wish)
         }
 
-        let Obj = {};
-        if (GetLicenseTypes.SubLicenseTypes.length > 0) {
-            Obj = {
-                include: {
-                    model: SubLicenseTypes
-                }
-            }
-            Object.assign(IncludeQuery, Obj)
-        } else {
-            Obj = IncludeQuery;
-        }
 
 
         let AllCatgories = await LicenseTypes.findOne({
@@ -146,9 +162,9 @@ export const GetAllLicenseTypeCourses = async (req, res) => {
                 LicenseTypeId: req.params.LicenseTypeId
             },
             attributes: { exclude: ["Active", "SubLicenseType"] },
-            ...Obj
+            ...Include
         });
-
+ 
         res.status(200).json(AllCatgories);
     } catch (error) {
         console.log(`error occurred while getting All LicenseTypes: ${error}`);

@@ -33,8 +33,22 @@ export const FindUserId = (UserArr, SocketId) => {
     UserArr.forEach((value, Index) => {
         value.forEach((ChildValue, ChildIndex) => {
             const { SocketId: SavedSocketId } = ChildValue
-            
+
             if (SavedSocketId === SocketId) {
+                User = ChildValue
+            }
+        })
+    })
+
+    return User
+}
+export const GetSocketId = (UserArr, GivenUserId) => {
+    let User
+    UserArr.forEach((value, Index) => {
+        value.forEach((ChildValue, ChildIndex) => {
+            const { SocketId: SavedSocketId, UserId } = ChildValue
+      
+            if (GivenUserId === UserId) {
                 User = ChildValue
             }
         })
